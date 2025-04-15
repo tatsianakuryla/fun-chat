@@ -1,0 +1,36 @@
+{
+  "compilerOptions": {
+    "target": "ES6",
+    "module": "ESNext",
+    "moduleResolution": "node",
+    "outDir": "./fun-chat/dist",
+    "rootDir": "./fun-chat/src",
+    "strict": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "strictBindCallApply": true,
+    "strictPropertyInitialization": true,
+    "noImplicitThis": true,
+    "alwaysStrict": true,
+    "resolveJsonModule": true,
+    "lib": ["DOM", "ES2021"],
+    "forceConsistentCasingInFileNames": true
+  },
+  "include": [
+    "fun-chat/src/**/*",
+    "commitlint.config.js",
+    "webpack.config.js",
+    "eslint.config.mjs"
+  ],
+  "exclude": [
+    "node_modules",
+    "fun-chat/dist"
+  ],
+  "baseUrl": "fun-chat/src",
+  "paths": {
+  "@components/*": ["components/*"],
+  "@api/*": ["api/*"],
+  "@core/*": ["core/*"]
+  }
+}

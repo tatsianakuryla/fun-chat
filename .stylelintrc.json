@@ -1,0 +1,23 @@
+{
+  "extends": [
+    "stylelint-config-standard",
+    "stylelint-config-clean-order"
+  ],
+  "rules": {
+    "color-hex-length": "short",
+    "color-named": "never",
+    "font-family-no-missing-generic-family-keyword": true,
+    "no-empty-source": true,
+    "selector-class-pattern": "^[a-z0-9\\-_]+$",
+    "selector-pseudo-class-no-unknown": [
+      true,
+      {
+        "ignorePseudoClasses": ["global"]
+      }
+    ],
+    "no-duplicate-selectors": true,
+    "max-nesting-depth": 3,
+
+    "order/properties-alphabetical-order": null
+  }
+}
