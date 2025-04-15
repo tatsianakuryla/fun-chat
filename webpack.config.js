@@ -1,6 +1,5 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 module.exports = {
   entry: './fun-chat/src/index.ts',
@@ -19,13 +18,30 @@ module.exports = {
   module: {
     rules: [
       {
-        test: /\.tsx?$/,
-        use: 'ts-loader',
-        exclude: /node_modules/,
+        test: /\.module\.css$/i,
+        use: [
+          'style-loader',
+          {
+            loader: 'css-loader',
+            options: {
+              sourceMap: true,
+              modules: {
+                namedExport: false,
+                exportLocalsConvention: 'as-is',
+              },
+            },
+          },
+        ],
       },
       {
         test: /\.css$/i,
+        exclude: /\.module\.css$/i,
         use: ['style-loader', 'css-loader'],
+      },
+      {
+        test: /\.tsx?$/,
+        use: 'ts-loader',
+        exclude: /node_modules/,
       },
       {
         test: /\.(png|jpe?g|gif|svg)$/i,
@@ -44,14 +60,7 @@ module.exports = {
   plugins: [
     new HtmlWebpackPlugin({
       template: './fun-chat/src/index.html',
+      favicon: './fun-chat/public/favicon.png',
     }),
-    // new CopyWebpackPlugin({
-    //   patterns: [
-    //     {
-    //       from: './fun-chat/public/favicon.png',
-    //       to: 'favicon.png',
-    //     },
-    //   ],
-    // }),
   ],
 };

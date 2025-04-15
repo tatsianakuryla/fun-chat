@@ -15,22 +15,22 @@
     "alwaysStrict": true,
     "resolveJsonModule": true,
     "lib": ["DOM", "ES2021"],
-    "forceConsistentCasingInFileNames": true
+    "forceConsistentCasingInFileNames": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true
   },
   "include": [
     "fun-chat/src/**/*",
     "commitlint.config.js",
     "webpack.config.js",
-    "eslint.config.mjs"
+    "eslint.config.mjs",
+    "declarations.d.ts"
   ],
-  "exclude": [
-    "node_modules",
-    "fun-chat/dist"
-  ],
+  "exclude": ["node_modules", "fun-chat/dist"],
   "baseUrl": "fun-chat/src",
   "paths": {
-  "@components/*": ["components/*"],
-  "@api/*": ["api/*"],
-  "@core/*": ["core/*"]
+    "@components/*": ["components/*"],
+    "@api/*": ["api/*"],
+    "@core/*": ["core/*"]
   }
 }
