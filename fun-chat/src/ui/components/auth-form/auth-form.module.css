@@ -14,6 +14,11 @@
   background-color: #fff;
 }
 
+.auth-form__error {
+  min-height: 30px;
+  background-color: rgb(61 140 61);
+}
+
 .auth-form__label {
   background-color: #fff;
 }
@@ -36,4 +41,14 @@
 
 .auth-form__input-label-wrapper {
   background-color: #fff;
+}
+
+.auth-form__toggle-password_hidden {
+  width: 40px;
+  height: 40px;
+  background-color: rgb(237 12 12);
+}
+
+.auth-form__toggle-password_show {
+  background-color: rgb(12 237 121);
 }

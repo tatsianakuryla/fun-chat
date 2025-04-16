@@ -27,3 +27,8 @@ export enum AuthFormFields {
   Login = 'login',
   Password = 'password',
 }
+
+export type ValidatorResponse = {
+  isValid: boolean;
+  messages: string[];
+};
