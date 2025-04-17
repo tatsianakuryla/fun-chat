@@ -7,6 +7,7 @@ import { Routes } from './types';
 import { AuthForm } from './ui/components/auth-form/Auth-form';
 import { Main } from './ui/layouts/main/Main';
 import { BasePage } from './ui/pages/Base-page';
+import { AuthState } from './core/auth/Auth-state';
 
 export const FLEX_CLASS = 'flex';
 
@@ -20,11 +21,21 @@ export const authForm = new AuthForm();
 document.body.append(main);
 
 Router.addRoute(Routes.Authentication, () => {
+  if (AuthState.isAuthorized) {
+    Router.navigateTo(Routes.Chat);
+    return;
+  }
   BasePage.open(Routes.Authentication, authForm.container);
 });
 
-Router.addRoute(Routes.Chat, () => {});
+Router.addRoute(Routes.Chat, () => {
+  if (!AuthState.isAuthorized) {
+    Router.navigateTo(Routes.Authentication);
+    return;
+  }
+});
 
 Router.addRoute(Routes.About, () => {});
 
+AuthState.init();
 Router.init();

@@ -5,12 +5,12 @@ export class InputFactory {
   public static create(
     classes: string[],
     type: InputTypes,
-    name: AuthFormFields,
+    id: AuthFormFields,
     placeholder: string,
   ): HTMLInputElement {
     const input = createElementWithClassId('input', classes);
     input.type = type;
-    input.name = name;
+    input.id = id;
     input.placeholder = placeholder;
     return input;
   }

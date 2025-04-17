@@ -1,5 +1,5 @@
-import { LoginedUser } from '../../api/api-types';
-import { LocalStorageKeys } from './local-storage-types';
+import { type LoginedUser } from '../../api/api-types';
+import { type LocalStorageKeys } from './local-storage-types';
 
 export class LocalStorage {
   public static setLogin(key: LocalStorageKeys, value: string): void {
@@ -8,7 +8,7 @@ export class LocalStorage {
 
   public static getLogin(key: LocalStorageKeys.Login): string | null {
     const result = localStorage.getItem(key);
-    return result ? JSON.parse(result) : null;
+    return result ? result : null;
   }
 
   public static setUser(key: LocalStorageKeys, user: LoginedUser): void {
