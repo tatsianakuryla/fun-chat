@@ -120,7 +120,7 @@ export class AuthForm {
 
   private static _createWrapper(
     name: AuthFormFields,
-    input: HTMLInputElement,
+    input: HTMLElement,
     errorMessage: HTMLElement,
   ): HTMLElement {
     const wrapper = createElementWithClassId('div', [
@@ -156,25 +156,33 @@ export class AuthForm {
       style['auth-form'],
     ]);
 
-    const passwordWrapper = AuthForm._createWrapper(
-      AuthFormFields.Password,
-      this._passwordInput,
-      this._passwordErrorMessage,
-    );
-    passwordWrapper.append(this._showPasswordButton);
-
     form.append(
       AuthForm._createWrapper(
         AuthFormFields.Login,
         this._loginInput,
         this._loginErrorMessage,
       ),
-      passwordWrapper,
+      this._createPasswordWrapper(),
       this._submitButton,
       this._authErrorMessage,
     );
 
     return form;
+  }
+
+  private _createPasswordWrapper(): HTMLElement {
+    const inputWrapper = createElementWithClassId('div', [
+      style['auth-form__password-input-wrapper'],
+      FLEX_CLASS,
+    ]);
+    inputWrapper.append(this._passwordInput, this._showPasswordButton);
+    const passwordWrapper = AuthForm._createWrapper(
+      AuthFormFields.Password,
+      inputWrapper,
+      this._passwordErrorMessage,
+    );
+
+    return passwordWrapper;
   }
 
   private _validateField(
@@ -270,8 +278,8 @@ export class AuthForm {
     const isHidden = this._passwordInput.type === 'password';
     this._passwordInput.type = isHidden ? 'text' : 'password';
     this._showPasswordButton.classList.toggle(
-      style['auth-form__toggle-password_show'],
-      !isHidden,
+      style['auth-form__toggle-password_shown'],
+      isHidden,
     );
   };
 }
