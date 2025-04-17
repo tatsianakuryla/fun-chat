@@ -10,6 +10,8 @@ import { ContainerFactory } from '../container/Container';
 import { InputFactory } from '../Input';
 import { LabelFactory } from '../Label';
 import style from './auth-form.module.css';
+import { LocalStorage } from '../../../core/local-storge/Local-storage';
+import { LocalStorageKeys } from '../../../core/local-storge/local-storage-types';
 
 export class AuthForm {
   private static readonly SPACE_REGEX = /\s/g;
@@ -67,6 +69,12 @@ export class AuthForm {
 
     this._container = ContainerFactory.create('auth-form');
     this._container.append(this._form);
+    this._validateField(
+      this._loginInput.value,
+      AuthFormValidator.validateLogin,
+      this._loginErrorMessage,
+      (isValid) => (this._isLoginValid = isValid),
+    );
   }
 
   public get container(): HTMLElement {
@@ -98,12 +106,17 @@ export class AuthForm {
     type: InputTypes,
     placeholder: string,
   ): HTMLInputElement {
-    return InputFactory.create(
+    const input = InputFactory.create(
       [style['auth-form__input'], style[`auth-form__input_${name}`]],
       type,
       name,
       placeholder,
     );
+
+    const storedLogin = LocalStorage.getLogin(LocalStorageKeys.Login);
+    input.value =
+      name === AuthFormFields.Login && storedLogin !== null ? storedLogin : '';
+    return input;
   }
 
   private static _preventSpacesInputs(input: HTMLInputElement): void {
@@ -190,12 +203,15 @@ export class AuthForm {
         this._loginErrorMessage,
         (isValid) => (this._isLoginValid = isValid),
       );
+      if (this._isLoginValid) {
+        LocalStorage.setLogin(LocalStorageKeys.Login, this._loginInput.value);
+      }
     }, AuthForm._TIMEOUT);
   };
 
   private _handlePasswordInput = (): void => {
     AuthForm._preventSpacesInputs(this._passwordInput);
-    AuthForm._updateErrorMessage(this._loginErrorMessage, []);
+    AuthForm._updateErrorMessage(this._passwordErrorMessage, []);
     clearTimeout(this._inputTimeout);
 
     this._inputTimeout = setTimeout(() => {
@@ -228,13 +244,11 @@ export class AuthForm {
       return;
     }
 
-    this._cleanInputs();
-
     AuthService.login(this._loginInput.value, this._passwordInput.value)
       .then((user) => {
-        console.log(user);
-        this._cleanInputs();
         Router.navigateTo(Routes.Chat);
+        this._cleanInputs();
+        LocalStorage.setUser(LocalStorageKeys.User, user);
       })
       .catch((error) => {
         AuthForm._updateErrorMessage(this._authErrorMessage, [error]);
