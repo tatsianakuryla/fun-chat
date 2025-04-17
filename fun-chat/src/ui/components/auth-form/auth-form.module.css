@@ -19,6 +19,11 @@
   background-color: rgb(61 140 61);
 }
 
+.auth-form__auth-error {
+  min-height: 30px;
+  background-color: rgb(61 140 61);
+}
+
 .auth-form__label {
   background-color: #fff;
 }

@@ -32,3 +32,9 @@ export type ValidatorResponse = {
   isValid: boolean;
   messages: string[];
 };
+
+export enum Routes {
+  Authentication = 'authentication',
+  Chat = 'chat',
+  About = 'about',
+}

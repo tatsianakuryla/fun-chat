@@ -13,7 +13,12 @@ export default [
     },
   },
   {
-    ignores: ['dist/', 'commitlint.config.js', 'webpack.config.js'],
+    ignores: [
+      '**/dist/**',
+      '**/node_modules/**',
+      'commitlint.config.js',
+      'webpack.config.js',
+    ],
   },
   js.configs.recommended,
   {
@@ -38,6 +43,7 @@ export default [
         location: 'readonly',
         fetch: 'readonly',
         console: 'readonly',
+        clearTimeout: 'readonly',
       },
     },
     plugins: {

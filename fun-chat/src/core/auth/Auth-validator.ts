@@ -1,4 +1,4 @@
-import { ValidatorResponse } from '../../types';
+import type { ValidatorResponse } from '../../types';
 
 export class AuthFormValidator {
   private static readonly MIN_LOGIN_LENGTH = 3;
