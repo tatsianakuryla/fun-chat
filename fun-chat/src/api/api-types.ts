@@ -37,3 +37,19 @@ export enum AuthErrorsMessages {
   anotherLogged = 'Another user is already authorized in this connection',
   incorrectPassword = 'Incorrect password',
 }
+
+export type LogoutRequest = {
+  id: string;
+  type: 'USER_LOGOUT';
+  payload: {
+    user: User;
+  };
+};
+
+export type LogoutResponse = {
+  id: string;
+  type: 'USER_LOGOUT';
+  payload: {
+    user: LoginedUser;
+  };
+};

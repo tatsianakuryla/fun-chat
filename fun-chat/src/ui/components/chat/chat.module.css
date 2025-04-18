@@ -1,0 +1,33 @@
+.container__chat-header {
+  background-color: rgb(81 93 93);
+}
+
+.container__chat-main {
+  background-color: rgb(39 39 44);
+}
+
+.chat__wrapper {
+  margin-right: auto;
+}
+
+.chat__heading {
+  background-color: rgb(34 39 35);
+}
+
+.chat__user-login {
+  background-color: rgb(18 18 18);
+}
+
+.chat__logout-button {
+  width: 40px;
+  height: 40px;
+  background-color: rgb(31 29 29);
+}
+
+.chat__logout-wrapper {
+  background-color: rgb(38 37 35);
+}
+
+.chat__logout-error {
+  background-color: rgb(218 30 30);
+}

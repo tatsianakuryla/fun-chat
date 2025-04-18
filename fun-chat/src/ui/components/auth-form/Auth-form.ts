@@ -1,6 +1,5 @@
 import { Router } from '../../../core/router/router';
 import { FLEX_CLASS } from '../../..';
-import { AuthService } from '../../../core/auth/Auth-service';
 import { AuthFormValidator } from '../../../core/auth/Auth-validator';
 import type { InputTypes, ValidatorResponse } from '../../../types';
 import { AuthFormFields, Routes } from '../../../types';
@@ -13,6 +12,7 @@ import style from './auth-form.module.css';
 import { LocalStorage } from '../../../core/local-storge/Local-storage';
 import { LocalStorageKeys } from '../../../core/local-storge/local-storage-types';
 import { AuthState } from '../../../core/auth/Auth-state';
+import { WebSocketService } from '../../../api/Web-socket-service';
 
 export class AuthForm {
   private static readonly SPACE_REGEX = /\s/g;
@@ -22,60 +22,39 @@ export class AuthForm {
   private static readonly _TIMEOUT = 500;
 
   private _form: HTMLFormElement;
-  private _container: HTMLElement;
-  private _loginInput: HTMLInputElement;
-  private _loginErrorMessage: HTMLElement;
-  private _passwordInput: HTMLInputElement;
-  private _passwordErrorMessage: HTMLElement;
-  private _submitButton: HTMLButtonElement;
-  private _showPasswordButton: HTMLButtonElement;
-  private _authErrorMessage: HTMLElement;
+  private _mainContainer = ContainerFactory.create('auth-form');
+  private _loginInput = this._createInput(
+    AuthFormFields.Login,
+    'text',
+    AuthForm._LOGIN_PLACEHOLDER,
+  );
+  private _loginErrorMessage = AuthForm._createErrorMessageElement();
+  private _passwordInput = this._createInput(
+    AuthFormFields.Password,
+    'password',
+    AuthForm._PASSWORD_PLACEHOLDER,
+  );
+  private _passwordErrorMessage = AuthForm._createErrorMessageElement();
+  private _submitButton = AuthForm._createSubmitButton();
+  private _showPasswordButton = AuthForm._createShowPasswordButton();
+  private _authErrorMessage = createElementWithClassId('div', [
+    style['auth-form__auth-error'],
+  ]);
   private _isLoginValid = false;
   private _isPasswordValid = false;
   private _inputTimeout!: ReturnType<typeof setTimeout>;
-  private _storedLogin = LocalStorage.getLogin(LocalStorageKeys.Login);
 
   constructor() {
-    this._loginInput = this._createInput(
-      AuthFormFields.Login,
-      'text',
-      AuthForm._LOGIN_PLACEHOLDER,
-    );
-    this._loginErrorMessage = AuthForm._createErrorMessageElement();
-    this._loginInput.addEventListener('input', this._handleLoginInput);
-    this._passwordInput = this._createInput(
-      AuthFormFields.Password,
-      'password',
-      AuthForm._PASSWORD_PLACEHOLDER,
-    );
-    this._passwordErrorMessage = AuthForm._createErrorMessageElement();
-    this._showPasswordButton = AuthForm._createShowPasswordButton();
-    this._passwordInput.addEventListener('input', this._handlePasswordInput);
-    this._showPasswordButton.addEventListener(
-      'click',
-      this._togglePasswordInputType,
-    );
-    this._authErrorMessage = createElementWithClassId('div', [
-      style['auth-form__auth-error'],
-    ]);
-    this._submitButton = AuthForm._createSubmitButton();
-    this._updateSubmitButton();
     this._form = this._createForm();
-    this._form.addEventListener('submit', this._handleFormSubmit);
-    this._container = ContainerFactory.create('auth-form');
-    this._container.append(this._form);
-    if (this._storedLogin !== null) {
-      this._validateField(
-        this._loginInput.value,
-        AuthFormValidator.validateLogin,
-        this._loginErrorMessage,
-        (isValid) => (this._isLoginValid = isValid),
-      );
-    }
+    this._implementEventListeners();
+    this._mainContainer.append(this._form);
+    this._inputsValidation();
+    this._cleanInputs();
+    this._updateSubmitButton();
   }
 
-  public get container(): HTMLElement {
-    return this._container;
+  public get mainContainer(): HTMLElement {
+    return this._mainContainer;
   }
 
   private static _createLabel(name: AuthFormFields): HTMLLabelElement {
@@ -131,6 +110,16 @@ export class AuthForm {
     return wrapper;
   }
 
+  private _implementEventListeners(): void {
+    this._loginInput.addEventListener('input', this._handleLoginInput);
+    this._passwordInput.addEventListener('input', this._handlePasswordInput);
+    this._showPasswordButton.addEventListener(
+      'click',
+      this._togglePasswordInputType,
+    );
+    this._form.addEventListener('submit', this._handleFormSubmit);
+  }
+
   private _createInput(
     id: AuthFormFields,
     type: InputTypes,
@@ -143,10 +132,9 @@ export class AuthForm {
       placeholder,
     );
 
+    const storedLogin = LocalStorage.getUserData(LocalStorageKeys.Login);
     input.value =
-      id === AuthFormFields.Login && this._storedLogin !== null
-        ? this._storedLogin
-        : '';
+      id === AuthFormFields.Login && storedLogin !== null ? storedLogin : '';
     return input;
   }
 
@@ -209,7 +197,7 @@ export class AuthForm {
         this._loginErrorMessage,
         (isValid) => (this._isLoginValid = isValid),
       );
-      LocalStorage.setLogin(LocalStorageKeys.Login, this._loginInput.value);
+      LocalStorage.setUserData(LocalStorageKeys.Login, this._loginInput.value);
     }, AuthForm._TIMEOUT);
   };
 
@@ -225,47 +213,69 @@ export class AuthForm {
         this._passwordErrorMessage,
         (isValid) => (this._isPasswordValid = isValid),
       );
+      LocalStorage.setUserData(
+        LocalStorageKeys.Password,
+        this._passwordInput.value,
+      );
     }, AuthForm._TIMEOUT);
   };
 
+  private _inputsValidation(): void {
+    if (this._loginInput.value) {
+      this._validateField(
+        this._loginInput.value,
+        AuthFormValidator.validateLogin,
+        this._loginErrorMessage,
+        (isValid) => (this._isLoginValid = isValid),
+      );
+    }
+
+    if (this._passwordInput.value) {
+      this._validateField(
+        this._passwordInput.value,
+        AuthFormValidator.validatePassword,
+        this._passwordErrorMessage,
+        (isValid) => (this._isPasswordValid = isValid),
+      );
+    }
+  }
+
   private _handleFormSubmit = (event: SubmitEvent): void => {
     event.preventDefault();
-    this._validateField(
-      this._loginInput.value,
-      AuthFormValidator.validateLogin,
-      this._loginErrorMessage,
-      (isValid) => (this._isLoginValid = isValid),
-    );
 
-    this._validateField(
-      this._passwordInput.value,
-      AuthFormValidator.validatePassword,
-      this._passwordErrorMessage,
-      (isValid) => (this._isPasswordValid = isValid),
-    );
+    this._inputsValidation();
 
     if (!(this._isLoginValid && this._isPasswordValid)) {
       return;
     }
 
-    AuthService.login(this._loginInput.value, this._passwordInput.value)
+    WebSocketService.loginUser(
+      this._loginInput.value,
+      this._passwordInput.value,
+    )
       .then((user) => {
-        AuthState.setUser(user);
+        AuthState.setUser(user, this._passwordInput.value);
         Router.navigateTo(Routes.Chat);
         this._cleanInputs();
-        LocalStorage.setUser(LocalStorageKeys.User, user);
       })
       .catch((error) => {
         AuthForm._updateErrorMessage(this._authErrorMessage, [error]);
       });
   };
 
-  private _cleanInputs(): void {
-    this._loginInput.value = '';
-    this._passwordInput.value = '';
+  private _clearErrors(): void {
     AuthForm._updateErrorMessage(this._authErrorMessage, []);
     AuthForm._updateErrorMessage(this._loginErrorMessage, []);
     AuthForm._updateErrorMessage(this._passwordErrorMessage, []);
+  }
+
+  private _cleanInputs(): void {
+    this._loginInput.value =
+      LocalStorage.getUserData(LocalStorageKeys.Login) ?? '';
+    this._passwordInput.value = '';
+    this._isPasswordValid = false;
+    this._updateSubmitButton();
+    this._clearErrors();
   }
 
   private _updateSubmitButton(): void {

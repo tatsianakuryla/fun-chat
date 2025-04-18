@@ -4,38 +4,42 @@ import './styles/style.css';
 import { WebSocketService } from './api/Web-socket-service';
 import { Router } from './core/router/router';
 import { Routes } from './types';
-import { AuthForm } from './ui/components/auth-form/Auth-form';
-import { Main } from './ui/layouts/main/Main';
-import { BasePage } from './ui/pages/Base-page';
+import { AuthPage } from './ui/pages/Auth-page';
 import { AuthState } from './core/auth/Auth-state';
+import { PrimaryLayout } from './ui/layouts/primary-layout';
+import { ChatPage } from './ui/pages/Chat-page';
 
 export const FLEX_CLASS = 'flex';
+export const primaryLayout = new PrimaryLayout();
+export const authPage = new AuthPage();
+export const chatPage = new ChatPage();
 
-WebSocketService.connect();
+function appInit() {
+  AuthState.init();
+  primaryLayout.render();
 
-const mainClass = new Main();
-export const main = mainClass.element;
+  Router.addRoute(Routes.Authentication, () => {
+    if (AuthState.isAuthorized) {
+      Router.navigateTo(Routes.Chat);
+      return;
+    }
+    authPage.open();
+  });
 
-export const authForm = new AuthForm();
+  Router.addRoute(Routes.Chat, () => {
+    if (!AuthState.isAuthorized) {
+      Router.navigateTo(Routes.Authentication);
+      return;
+    }
+    chatPage.open();
+  });
 
-document.body.append(main);
+  Router.addRoute(Routes.About, () => {
+    /* ... */
+  });
 
-Router.addRoute(Routes.Authentication, () => {
-  if (AuthState.isAuthorized) {
-    Router.navigateTo(Routes.Chat);
-    return;
-  }
-  BasePage.open(Routes.Authentication, authForm.container);
-});
+  Router.init();
+  WebSocketService.connect();
+}
 
-Router.addRoute(Routes.Chat, () => {
-  if (!AuthState.isAuthorized) {
-    Router.navigateTo(Routes.Authentication);
-    return;
-  }
-});
-
-Router.addRoute(Routes.About, () => {});
-
-AuthState.init();
-Router.init();
+appInit();

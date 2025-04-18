@@ -2,11 +2,16 @@ import { type LoginedUser } from '../../api/api-types';
 import { type LocalStorageKeys } from './local-storage-types';
 
 export class LocalStorage {
-  public static setLogin(key: LocalStorageKeys, value: string): void {
+  public static setUserData(
+    key: LocalStorageKeys.Login | LocalStorageKeys.Password,
+    value: string,
+  ): void {
     localStorage.setItem(key, value);
   }
 
-  public static getLogin(key: LocalStorageKeys.Login): string | null {
+  public static getUserData(
+    key: LocalStorageKeys.Login | LocalStorageKeys.Password,
+  ): string | null {
     const result = localStorage.getItem(key);
     return result ? result : null;
   }

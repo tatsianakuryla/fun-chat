@@ -6,7 +6,6 @@ export class Router {
   public static init(): void {
     window.addEventListener('hashchange', () => this._handleRoute());
     document.addEventListener('DOMContentLoaded', () => this._handleRoute());
-    this._handleRoute();
   }
 
   public static navigateTo(route: Routes): void {
