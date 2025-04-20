@@ -14,7 +14,7 @@ export const primaryLayout = new PrimaryLayout();
 export const authPage = new AuthPage();
 export const chatPage = new ChatPage();
 
-function appInit() {
+function appInit(): void {
   AuthState.init();
   primaryLayout.render();
 

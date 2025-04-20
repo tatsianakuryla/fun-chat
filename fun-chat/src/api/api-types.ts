@@ -53,3 +53,16 @@ export type LogoutResponse = {
     user: LoginedUser;
   };
 };
+
+export type GetAuthorizedUsersRequest = {
+  id: string;
+  type: 'GET_AUTHORIZED_USERS';
+};
+
+export type GetAuthorizedUsersResponse = {
+  id: string;
+  type: 'GET_AUTHORIZED_USERS';
+  payload: {
+    users: LoginedUser[];
+  };
+};

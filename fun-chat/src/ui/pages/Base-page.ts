@@ -17,14 +17,18 @@ export abstract class BasePage<T extends Chat | AuthForm> {
     this._element = value;
   }
 
-  public abstract open(): void;
-
   public clear(): void {
     if (!this._element) return;
 
     if (this._element instanceof Chat) {
-      if (primaryLayout.header.contains(this._element.headerContainer)) {
+      if (
+        primaryLayout.header.contains(this._element.headerContainer) &&
+        primaryLayout.footer.contains(this._element.footerContainer) &&
+        primaryLayout.main.contains(this._element.mainContainer)
+      ) {
         primaryLayout.header.removeChild(this._element.headerContainer);
+        primaryLayout.footer.removeChild(this._element.footerContainer);
+        primaryLayout.main.removeChild(this._element.mainContainer);
       }
     }
 
@@ -36,4 +40,6 @@ export abstract class BasePage<T extends Chat | AuthForm> {
 
     this._element = null;
   }
+
+  public abstract open(): void;
 }

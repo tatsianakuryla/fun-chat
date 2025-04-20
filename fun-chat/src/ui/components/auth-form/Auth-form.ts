@@ -23,13 +23,13 @@ export class AuthForm {
 
   private _form: HTMLFormElement;
   private _mainContainer = ContainerFactory.create('auth-form');
-  private _loginInput = this._createInput(
+  private _loginInput = AuthForm._createInput(
     AuthFormFields.Login,
     'text',
     AuthForm._LOGIN_PLACEHOLDER,
   );
   private _loginErrorMessage = AuthForm._createErrorMessageElement();
-  private _passwordInput = this._createInput(
+  private _passwordInput = AuthForm._createInput(
     AuthFormFields.Password,
     'password',
     AuthForm._PASSWORD_PLACEHOLDER,
@@ -88,6 +88,24 @@ export class AuthForm {
     element.textContent = messages.join(', ');
   }
 
+  private static _createInput(
+    id: AuthFormFields,
+    type: InputTypes,
+    placeholder: string,
+  ): HTMLInputElement {
+    const input = InputFactory.create(
+      [style['auth-form__input'], style[`auth-form__input_${id}`]],
+      type,
+      id,
+      placeholder,
+    );
+
+    const storedLogin = LocalStorage.getUserData(LocalStorageKeys.Login);
+    input.value =
+      id === AuthFormFields.Login && storedLogin !== null ? storedLogin : '';
+    return input;
+  }
+
   private static _createErrorMessageElement(): HTMLElement {
     const element = createElementWithClassId('div', [
       style['auth-form__error'],
@@ -118,24 +136,6 @@ export class AuthForm {
       this._togglePasswordInputType,
     );
     this._form.addEventListener('submit', this._handleFormSubmit);
-  }
-
-  private _createInput(
-    id: AuthFormFields,
-    type: InputTypes,
-    placeholder: string,
-  ): HTMLInputElement {
-    const input = InputFactory.create(
-      [style['auth-form__input'], style[`auth-form__input_${id}`]],
-      type,
-      id,
-      placeholder,
-    );
-
-    const storedLogin = LocalStorage.getUserData(LocalStorageKeys.Login);
-    input.value =
-      id === AuthFormFields.Login && storedLogin !== null ? storedLogin : '';
-    return input;
   }
 
   private _createForm(): HTMLFormElement {

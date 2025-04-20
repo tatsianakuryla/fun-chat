@@ -1,4 +1,3 @@
-import { Router } from '../core/router/router';
 import { AuthState } from '../core/auth/Auth-state';
 import { IdCreator } from '../core/id-creator/id-creator';
 import type {
@@ -10,7 +9,6 @@ import type {
   LogoutRequest,
   LogoutResponse,
 } from './api-types';
-import { Routes } from '../types';
 
 export class WebSocketService {
   private static _socket: WebSocket;
@@ -38,9 +36,7 @@ export class WebSocketService {
           });
       }
     });
-    this._socket.addEventListener('close', () => {
-      console.log('WebSocket отключён!');
-    });
+    this._socket.addEventListener('close', () => {});
   }
 
   public static loginUser(

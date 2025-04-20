@@ -26,6 +26,7 @@ export type InputTypes =
 export enum AuthFormFields {
   Login = 'login',
   Password = 'password',
+  Search = 'search',
 }
 
 export type ValidatorResponse = {
@@ -38,3 +39,5 @@ export enum Routes {
   Chat = 'chat',
   About = 'about',
 }
+
+export type UserStatus = 'online' | 'offline';

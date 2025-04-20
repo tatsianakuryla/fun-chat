@@ -4,38 +4,34 @@ import { WebSocketService } from '../../../api/Web-socket-service';
 import { AuthState } from '../../../core/auth/Auth-state';
 import { createElementWithClassId } from '../../../utils/helpers';
 import { ButtonFactory } from '../Button';
-import { ContainerFactory } from '../container/Container';
 import style from './chat.module.css';
+import { ChatFooterFactory } from './Chat-footer';
+import { ChatHeaderFactory } from './Chat-header';
+import { ChatMainFactory } from './Chat-main';
 
 export class Chat {
-  private static readonly _HEADING = 'FUN CHAT';
-  private _headerContainer = ContainerFactory.create('chat-header');
+  private _headerContainer = ChatHeaderFactory.createContainer();
   private _logoutErrorMessage = createElementWithClassId('div', [
     style['chat__logout-error'],
   ]);
-  private _mainContainer = ContainerFactory.create('chat-main');
+  private _mainContainer = ChatMainFactory.createContainer();
+  private _footerContainer = ChatFooterFactory.createContainer();
 
   constructor() {
     Chat._updateErrorMessage(this._logoutErrorMessage, []);
-    this._renderHeader();
+    this._headerContainer.append(this._createLogoutButton());
   }
 
   public get headerContainer(): HTMLElement {
     return this._headerContainer;
   }
 
-  private static _createHeading(): HTMLElement {
-    const wrapper = createElementWithClassId('div', [style['chat__wrapper']]);
-    const heading = createElementWithClassId('h1', [style['chat__heading']]);
-    heading.textContent = Chat._HEADING;
+  public get mainContainer(): HTMLElement {
+    return this._mainContainer;
+  }
 
-    const userLogin = createElementWithClassId('h2', [
-      style['chat__user-login'],
-    ]);
-    userLogin.textContent = AuthState.user?.login ?? '';
-
-    wrapper.append(heading, userLogin);
-    return wrapper;
+  public get footerContainer(): HTMLElement {
+    return this._footerContainer;
   }
 
   private static _updateErrorMessage(
@@ -79,12 +75,5 @@ export class Chat {
     wrapper.append(this._logoutErrorMessage, button);
 
     return wrapper;
-  }
-
-  private _renderHeader(): void {
-    this._headerContainer.append(
-      Chat._createHeading(),
-      this._createLogoutButton(),
-    );
   }
 }
