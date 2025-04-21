@@ -10,7 +10,7 @@
     "prepare": "husky install",
     "test": "echo \"No tests specified\" && exit 0",
     "predeploy": "npm run build",
-    "deploy": "gh-pages -d dist"
+    "deploy": "gh-pages -d fun-chat/dist"
   },
   "homepage": "https://tatsianakuryla.github.io/tatsianakuryla-JSFE2024Q4/fun-chat",
   "devDependencies": {
