@@ -1,5 +1,5 @@
 import { FLEX_CLASS } from '../../..';
-import { LoginedUser } from '../../../api/api-types';
+import { LoginedUser, RequestResponseTypes } from '../../../api/api-types';
 import { WebSocketService } from '../../../api/Web-socket-service';
 import { AuthState } from '../../../core/auth/Auth-state';
 import { AuthFormFields, UserStatus } from '../../../types';
@@ -13,6 +13,7 @@ export class ChatMain {
   private readonly _SEARCH_TIMEOUT = 300;
   private _searchTerm = '';
   private _usersList: HTMLUListElement;
+  private static _unreadMap = new Map<string, number>();
 
   constructor() {
     this._usersList = createElementWithClassId('ul', [
@@ -20,6 +21,16 @@ export class ChatMain {
       FLEX_CLASS,
     ]);
     this.renderUsersList();
+
+    WebSocketService.onMessage((msg) => {
+      if (msg.type === RequestResponseTypes.MSG_SEND) {
+        const from = msg.payload.message.from;
+        if (from === AuthState.user?.login) return;
+        const prev = ChatMain._unreadMap.get(from) || 0;
+        ChatMain._unreadMap.set(from, prev + 1);
+        this.renderUsersList();
+      }
+    });
   }
 
   public createContainer(): HTMLElement {
@@ -77,8 +88,7 @@ export class ChatMain {
         const login = user.login;
         const status = user.isLogined ? UserStatus.Online : UserStatus.Offline;
 
-        // const newMessages = await WebSocketService.getUnreadMessagesCount(login);
-        const newMessages = 0;
+        const newMessages = ChatMain._unreadMap.get(login) || 0;
         return ChatMain._createUserListItem(status, login, newMessages);
       });
 
@@ -108,13 +118,19 @@ export class ChatMain {
       style['chat__users-item-login'],
     ]);
     loginDiv.textContent = login;
+    item.append(statusDiv, loginDiv);
 
-    const newMessagesDiv = createElementWithClassId('div', [
-      style['chat__users-item-new-messages'],
-    ]);
-    newMessagesDiv.textContent = String(newMessages);
+    const newMessagesDiv =
+      newMessages > 0
+        ? createElementWithClassId('div', [
+            style['chat__users-item-new-messages'],
+          ])
+        : null;
+    if (newMessagesDiv) {
+      newMessagesDiv.textContent = String(newMessages);
+      item.append(newMessagesDiv);
+    }
 
-    item.append(statusDiv, loginDiv, newMessagesDiv);
     return item;
   }
 

@@ -32,6 +32,7 @@ export class WebSocketService {
       reject: (e: AuthErrorsMessages) => void;
     }
   >();
+  private static _messageListeners: Array<(msg: any) => void> = [];
   private static _onDisconnect: Array<() => void> = [];
   private static _onReconnect: Array<() => void> = [];
   private static _onOpen: Array<() => void> = [];
@@ -80,6 +81,10 @@ export class WebSocketService {
 
   public static get isConnected(): boolean {
     return this._socket?.readyState === WebSocket.OPEN;
+  }
+
+  public static onMessage(handler: (msg: any) => void): void {
+    this._messageListeners.push(handler);
   }
 
   public static onDisconnect(fn: () => void): void {
@@ -206,5 +211,6 @@ export class WebSocketService {
         handler.reject(result.payload.error);
       }
     }
+    this._messageListeners.forEach((fn) => fn(result));
   };
 }
