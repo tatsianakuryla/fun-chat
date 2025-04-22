@@ -48,7 +48,6 @@
 .chat__logout-button {
   cursor: pointer;
 
-  margin-top: 1rem;
   padding: var(--padding-sm) var(--padding-md);
   border: 2px solid var(--color-danger);
   border-radius: var(--radius-small);
@@ -122,7 +121,6 @@
   cursor: pointer;
 
   width: calc((100% - 1rem) * 0.5);
-  margin-bottom: 0.75rem;
   padding: var(--padding-md);
   border-radius: var(--radius-medium);
 
@@ -140,10 +138,8 @@
 }
 
 .chat__users-item {
-  display: flex;
   flex-direction: row;
   align-items: center;
-
   padding: var(--padding-sm) 0;
   border-bottom: 1px dashed var(--color-border);
 }
@@ -187,7 +183,6 @@
 /* FOOTER */
 
 .chat__footer-link {
-  display: flex;
   flex-direction: row;
   align-items: center;
   justify-content: center;
@@ -225,7 +220,6 @@
   width: 1.75rem;
   height: 1.75rem;
   margin-left: 0.5rem;
-  object-fit: contain;
 }
 
 @media (width <= 768px) {

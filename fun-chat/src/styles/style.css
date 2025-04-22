@@ -27,6 +27,10 @@ body {
   background: var(--auth-form-background);
 }
 
+main {
+  flex: 1;
+}
+
 img {
   max-width: 100%;
 }
