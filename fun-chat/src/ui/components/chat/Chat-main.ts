@@ -9,6 +9,9 @@ import { InputFactory } from '../Input';
 import style from './chat.module.css';
 
 export class ChatMain {
+  private _searchTimeoutId!: ReturnType<typeof setTimeout>;
+  private readonly _SEARCH_TIMEOUT = 300;
+  private _searchTerm = '';
   private _usersList: HTMLUListElement;
 
   constructor() {
@@ -34,17 +37,27 @@ export class ChatMain {
       FLEX_CLASS,
     ]);
 
-    wrapper.append(ChatMain._createSearchInput(), this._usersList);
+    wrapper.append(this._createSearchInput(), this._usersList);
     return wrapper;
   }
 
-  private static _createSearchInput(): HTMLInputElement {
+  private _createSearchInput(): HTMLInputElement {
     const searchInput = InputFactory.create(
       [style['chat__search-input']],
       'search',
       AuthFormFields.Search,
       '',
     );
+
+    searchInput.addEventListener('input', () => {
+      clearTimeout(this._searchTimeoutId);
+      this._searchTerm = searchInput.value;
+      this._searchTimeoutId = setTimeout(
+        () => this.renderUsersList(),
+        this._SEARCH_TIMEOUT,
+      );
+    });
+
     return searchInput;
   }
 
@@ -52,18 +65,22 @@ export class ChatMain {
     ChatMain._getAllUsers().then((users) => {
       this._usersList.replaceChildren();
       console.log('Ghbdtn', users);
-      const userItemsPromises = users
+      const withoutCurrentUser = users
         .filter((user) => user.login !== AuthState.user?.login)
-        .map(async (user) => {
-          const login = user.login;
-          const status = user.isLogined
-            ? UserStatus.Online
-            : UserStatus.Offline;
+        .filter((user) =>
+          user.login
+            .toLowerCase()
+            .includes(this._searchTerm.trim().toLowerCase()),
+        );
 
-          // const newMessages = await WebSocketService.getUnreadMessagesCount(login);
-          const newMessages = 0;
-          return ChatMain._createUserListItem(status, login, newMessages);
-        });
+      const userItemsPromises = withoutCurrentUser.map(async (user) => {
+        const login = user.login;
+        const status = user.isLogined ? UserStatus.Online : UserStatus.Offline;
+
+        // const newMessages = await WebSocketService.getUnreadMessagesCount(login);
+        const newMessages = 0;
+        return ChatMain._createUserListItem(status, login, newMessages);
+      });
 
       Promise.all(userItemsPromises).then((userItems) => {
         userItems.forEach((item) => this._usersList.appendChild(item));
