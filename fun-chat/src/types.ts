@@ -40,4 +40,7 @@ export enum Routes {
   About = 'about',
 }
 
-export type UserStatus = 'online' | 'offline';
+export enum UserStatus {
+  Online = 'online',
+  Offline = 'offline',
+}

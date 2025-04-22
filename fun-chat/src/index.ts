@@ -16,6 +16,16 @@ export const chatPage = new ChatPage();
 
 function appInit(): void {
   AuthState.init();
+
+  WebSocketService.onDisconnect(() => {
+    // ERROR
+  });
+
+  WebSocketService.onReconnect(() => {
+    // HIDE ERROR
+  });
+
+  WebSocketService.connect();
   primaryLayout.render();
 
   Router.addRoute(Routes.Authentication, () => {
@@ -39,7 +49,6 @@ function appInit(): void {
   });
 
   Router.init();
-  WebSocketService.connect();
 }
 
 appInit();

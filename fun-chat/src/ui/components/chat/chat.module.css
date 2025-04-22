@@ -25,6 +25,8 @@
   --padding-md: 1rem;
   --padding-lg: 1.5rem;
   --transition-base: 0.3s ease;
+  --status-width: 60px;
+  --messages-width: 40px;
 }
 
 /* HEADER */
@@ -109,6 +111,7 @@
 .chat__users-list {
   overflow-y: auto;
   flex-grow: 1;
+  gap: 10px;
 
   padding: var(--padding-md);
   border-radius: var(--radius-large);
@@ -138,20 +141,32 @@
 }
 
 .chat__users-item {
+  cursor: pointer;
+
   flex-direction: row;
+  gap: 10px;
   align-items: center;
-  padding: var(--padding-sm) 0;
-  border-bottom: 1px dashed var(--color-border);
+
+  padding: var(--padding-sm);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-medium);
+
+  transition:
+    background-color 0.3s ease,
+    box-shadow 0.3s ease,
+    border-color 0.3s ease;
 }
 
-.chat__users-item:last-child {
-  border-bottom: none;
+.chat__users-item:hover {
+  border-color: rgb(0 123 255 / 30%);
+  background-color: rgb(0 123 255 / 5%);
+  box-shadow: 0 2px 8px rgb(0 0 0 / 5%);
 }
 
 .chat__users-item-status {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
+  width: var(--status-width);
+  border-radius: var(--radius-small);
+  text-align: center;
   box-shadow: 0 0 3px rgb(0 0 0 / 10%);
 }
 
@@ -164,17 +179,21 @@
 }
 
 .chat__users-item-login {
+  width: calc(100% - var(--status-width) - var(--messages-width) - 10px * 2);
   font-weight: 600;
   color: var(--color-login);
 }
 
 .chat__users-item-new-messages {
-  padding: 0.3rem 0.6rem;
+  width: var(--messages-width);
+  height: var(--messages-width);
+  padding-top: 0.93rem;
   border-radius: var(--radius-medium);
 
   font-size: var(--font-size-sm);
   font-weight: bold;
   color: var(--color-light-bg);
+  text-align: center;
 
   background: linear-gradient(to right, #ff6f61, #ff8a65);
   box-shadow: 0 0 4px rgb(255 105 97 / 50%);

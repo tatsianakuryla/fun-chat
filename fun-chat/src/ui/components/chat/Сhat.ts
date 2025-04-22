@@ -7,14 +7,15 @@ import { ButtonFactory } from '../Button';
 import style from './chat.module.css';
 import { ChatFooterFactory } from './Chat-footer';
 import { ChatHeaderFactory } from './Chat-header';
-import { ChatMainFactory } from './Chat-main';
+import { ChatMain } from './Chat-main';
 
 export class Chat {
   private _headerContainer = ChatHeaderFactory.createContainer();
   private _logoutErrorMessage = createElementWithClassId('div', [
     style['chat__logout-error'],
   ]);
-  private _mainContainer = ChatMainFactory.createContainer();
+  private _chatMain = new ChatMain();
+  private _mainContainer = this._chatMain.createContainer();
   private _footerContainer = ChatFooterFactory.createContainer();
 
   constructor() {
@@ -32,6 +33,10 @@ export class Chat {
 
   public get footerContainer(): HTMLElement {
     return this._footerContainer;
+  }
+
+  public get chatMain(): ChatMain {
+    return this._chatMain;
   }
 
   private static _updateErrorMessage(

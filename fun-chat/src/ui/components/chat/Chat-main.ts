@@ -1,27 +1,40 @@
 import { FLEX_CLASS } from '../../..';
-import { AuthFormFields, type UserStatus } from '../../../types';
+import { LoginedUser } from '../../../api/api-types';
+import { WebSocketService } from '../../../api/Web-socket-service';
+import { AuthState } from '../../../core/auth/Auth-state';
+import { AuthFormFields, UserStatus } from '../../../types';
 import { createElementWithClassId } from '../../../utils/helpers';
 import { ContainerFactory } from '../container/Container';
 import { InputFactory } from '../Input';
 import style from './chat.module.css';
 
-export class ChatMainFactory {
-  public static createContainer(): HTMLElement {
+export class ChatMain {
+  private _usersList: HTMLUListElement;
+
+  constructor() {
+    this._usersList = createElementWithClassId('ul', [
+      style['chat__users-list'],
+      FLEX_CLASS,
+    ]);
+    this.renderUsersList();
+  }
+
+  public createContainer(): HTMLElement {
     const mainContainer = ContainerFactory.create('chat-main');
     mainContainer.append(
       this._createUsersInfoWrapper(),
-      this._createUserDialog(),
+      ChatMain._createUserDialog(),
     );
     return mainContainer;
   }
 
-  private static _createUsersInfoWrapper(): HTMLElement {
+  private _createUsersInfoWrapper(): HTMLElement {
     const wrapper = createElementWithClassId('div', [
       style['chat__users-info'],
       FLEX_CLASS,
     ]);
 
-    wrapper.append(this._createSearchInput(), this._createUsersList());
+    wrapper.append(ChatMain._createSearchInput(), this._usersList);
     return wrapper;
   }
 
@@ -35,13 +48,27 @@ export class ChatMainFactory {
     return searchInput;
   }
 
-  private static _createUsersList(): HTMLUListElement {
-    const list = createElementWithClassId('ul', [
-      style['chat__users-list'],
-      FLEX_CLASS,
-    ]);
+  public renderUsersList(): void {
+    ChatMain._getAllUsers().then((users) => {
+      this._usersList.replaceChildren();
+      console.log('Ghbdtn', users);
+      const userItemsPromises = users
+        .filter((user) => user.login !== AuthState.user?.login)
+        .map(async (user) => {
+          const login = user.login;
+          const status = user.isLogined
+            ? UserStatus.Online
+            : UserStatus.Offline;
 
-    return list;
+          // const newMessages = await WebSocketService.getUnreadMessagesCount(login);
+          const newMessages = 0;
+          return ChatMain._createUserListItem(status, login, newMessages);
+        });
+
+      Promise.all(userItemsPromises).then((userItems) => {
+        userItems.forEach((item) => this._usersList.appendChild(item));
+      });
+    });
   }
 
   private static _createUserListItem(
@@ -81,4 +108,17 @@ export class ChatMainFactory {
     ]);
     return dialog;
   }
+
+  private static async _getAllUsers(): Promise<LoginedUser[]> {
+    const [onlineUsers, offlineUsers] = await Promise.all([
+      WebSocketService.getActiveUsers(),
+      WebSocketService.getInactiveUsers(),
+    ]);
+
+    return [...onlineUsers, ...offlineUsers];
+  }
+
+  // private static async _getUnredMessagesQuantity(): Promise<number> {
+  //   return await WebSocketService.getUnreadMessagesQuantity();
+  // }
 }

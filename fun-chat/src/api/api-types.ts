@@ -3,6 +3,28 @@ type User = {
   password: string;
 };
 
+export enum RequestResponseTypes {
+  Login = 'USER_LOGIN',
+  Logout = 'USER_LOGOUT',
+  USER_ACTIVE = 'USER_ACTIVE',
+  USER_INACTIVE = 'USER_INACTIVE',
+  MSG_FROM_USER = 'MSG_FROM_USER',
+  MSG_SEND = 'MSG_SEND',
+  MSG_READED = 'MSG_READ',
+  MSG_DELETE = 'MSG_DELETE',
+  MSG_EDIT = 'MSG_EDIT',
+
+  // server
+  USER_EXTERNAL_LOGIN = 'USER_EXTERNAL_LOGIN',
+  USER_EXTERNAL_LOGOUT = 'USER_EXTERNAL_LOGOUT',
+  MSG_READED_FROM_SERVER = 'MSG_READED_FROM_SERVER',
+  MSG_DELETED_FROM_SERVER = 'MSG_DELETED_FROM_SERVER',
+  MSG_EDITED_FROM_SERVER = 'MSG_EDITED_FROM_SERVER',
+  MSG_SENDED_FROM_SERVER = 'MSG_SENDED_FROM_SERVER',
+  MSG_DELIVERED = 'MSG_DELIVER',
+  Error = 'ERROR',
+}
+
 export type LoginedUser = {
   login: string;
   isLogined: boolean;
@@ -10,7 +32,7 @@ export type LoginedUser = {
 
 export type AuthRequest = {
   id: string;
-  type: 'USER_LOGIN';
+  type: RequestResponseTypes.Login;
   payload: {
     user: User;
   };
@@ -18,7 +40,7 @@ export type AuthRequest = {
 
 export type AuthResponse = {
   id: string;
-  type: 'USER_LOGIN';
+  type: RequestResponseTypes.Login;
   payload: {
     user: LoginedUser;
   };
@@ -26,7 +48,7 @@ export type AuthResponse = {
 
 export type AuthErrorResponse = {
   id: string;
-  type: 'ERROR';
+  type: RequestResponseTypes.Error;
   payload: {
     error: AuthErrorsMessages;
   };
@@ -40,7 +62,7 @@ export enum AuthErrorsMessages {
 
 export type LogoutRequest = {
   id: string;
-  type: 'USER_LOGOUT';
+  type: RequestResponseTypes.Logout;
   payload: {
     user: User;
   };
@@ -48,20 +70,48 @@ export type LogoutRequest = {
 
 export type LogoutResponse = {
   id: string;
-  type: 'USER_LOGOUT';
+  type: RequestResponseTypes.Logout;
   payload: {
     user: LoginedUser;
   };
 };
 
-export type GetAuthorizedUsersRequest = {
+// export type GetAuthorizedUsersRequest = {
+//   id: string;
+//   type: RequestResponseTypes.GET_AUTHORIZED_USERS;
+// };
+
+// export type GetAuthorizedUsersResponse = {
+//   id: string;
+//   type: RequestResponseTypes.GET_AUTHORIZED_USERS;
+//   payload: {
+//     users: LoginedUser[];
+//   };
+// };
+
+export type GetActiveUsersRequest = {
   id: string;
-  type: 'GET_AUTHORIZED_USERS';
+  type: RequestResponseTypes.USER_ACTIVE;
+  payload: null;
 };
 
-export type GetAuthorizedUsersResponse = {
+export type GetActiveUsersResponse = {
   id: string;
-  type: 'GET_AUTHORIZED_USERS';
+  type: RequestResponseTypes.USER_ACTIVE;
+  payload: {
+    users: LoginedUser[];
+  };
+};
+
+export type GetInactiveUsersRequest = {
+  id: string;
+  type: RequestResponseTypes.USER_INACTIVE;
+  payload: null;
+};
+
+export type GetInactiveUsersResponse = {
+  id: string;
+  type: RequestResponseTypes.USER_INACTIVE;
   payload: {
     users: LoginedUser[];
   };
