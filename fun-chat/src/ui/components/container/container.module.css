@@ -1,7 +1,7 @@
 :root {
   --gap-base: 1rem;
-  --padding-base: 2rem;
-  --padding-mobile: 1rem;
+  --padding-base: 1rem;
+  --padding-mobile: 0.8rem;
   --border-color: #e0e0e0;
   --bg-white: #fff;
   --bg-light: #f9f9f9;
