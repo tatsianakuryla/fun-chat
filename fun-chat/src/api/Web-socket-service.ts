@@ -1,18 +1,18 @@
 import { AuthState } from '../core/auth/Auth-state';
 import { IdCreator } from '../core/id-creator/id-creator';
 import {
-  GetActiveUsersRequest,
-  GetActiveUsersResponse,
-  GetInactiveUsersRequest,
-  GetInactiveUsersResponse,
+  type GetActiveUsersRequest,
+  type GetInactiveUsersRequest,
+  type Message,
+  type MessageFromUserRequest,
+  type MessageReadRequest,
+  type MessageSendRequest,
   RequestResponseTypes,
-  type AuthErrorResponse,
+  type ServerResponse,
   type AuthErrorsMessages,
   type AuthRequest,
-  type AuthResponse,
   type LoginedUser,
   type LogoutRequest,
-  type LogoutResponse,
 } from './api-types';
 
 export class WebSocketService {
@@ -21,24 +21,47 @@ export class WebSocketService {
   private static _loginResponseMap = new Map<
     string,
     {
-      resolve: (u: LoginedUser) => void;
-      reject: (e: AuthErrorsMessages) => void;
+      resolve: (user: LoginedUser) => void;
+      reject: (error: AuthErrorsMessages) => void;
     }
   >();
   private static _usersResponseMap = new Map<
     string,
     {
       resolve: (users: LoginedUser[]) => void;
-      reject: (e: AuthErrorsMessages) => void;
+      reject: (error: AuthErrorsMessages) => void;
     }
   >();
-  private static _messageListeners: Array<(msg: any) => void> = [];
+  private static _historyResponseMap = new Map<
+    string,
+    {
+      resolve: (messages: Message[]) => void;
+      reject: () => void;
+    }
+  >();
+  private static _sendMessageResponseMap = new Map<
+    string,
+    { resolve: (messages: Message) => void; reject: () => void }
+  >();
+  private static _readResponseMap = new Map<
+    string,
+    {
+      resolve: (message: { id: string; status: { isReaded: boolean } }) => void;
+      reject: () => void;
+    }
+  >();
+  private static _messageListeners: Array<(message: ServerResponse) => void> =
+    [];
   private static _onDisconnect: Array<() => void> = [];
   private static _onReconnect: Array<() => void> = [];
   private static _onOpen: Array<() => void> = [];
   private static _shouldReconnect = true;
   private static _reconnectDelay = 1000;
   private static _maxReconnectDelay = 30000;
+
+  public static get isConnected(): boolean {
+    return this._socket?.readyState === WebSocket.OPEN;
+  }
 
   public static connect(): void {
     this._socket = new WebSocket('ws://localhost:4000');
@@ -47,9 +70,9 @@ export class WebSocketService {
       this._messageQueue.forEach((data) => this._socket.send(data));
       this._messageQueue = [];
 
-      this._onOpen.forEach((fn) => fn());
+      this._onOpen.forEach((function_) => function_());
       this._reconnectDelay = 1000;
-      this._onReconnect.forEach((fn) => fn());
+      this._onReconnect.forEach((function_) => function_());
 
       const user = AuthState.user;
       const password = AuthState.password;
@@ -60,10 +83,10 @@ export class WebSocketService {
       }
     });
 
-    this._socket.addEventListener('message', this._handleLoginMessage);
+    this._socket.addEventListener('message', this._handleMessage);
 
     this._socket.addEventListener('close', () => {
-      this._onDisconnect.forEach((fn) => fn());
+      this._onDisconnect.forEach((function_) => function_());
 
       if (this._shouldReconnect) {
         setTimeout(() => this.connect(), this._reconnectDelay);
@@ -79,30 +102,16 @@ export class WebSocketService {
     });
   }
 
-  public static get isConnected(): boolean {
-    return this._socket?.readyState === WebSocket.OPEN;
-  }
-
-  public static onMessage(handler: (msg: any) => void): void {
+  public static onMessage(handler: (message: ServerResponse) => void): void {
     this._messageListeners.push(handler);
   }
 
-  public static onDisconnect(fn: () => void): void {
-    this._onDisconnect.push(fn);
+  public static onDisconnect(function_: () => void): void {
+    this._onDisconnect.push(function_);
   }
 
-  public static onReconnect(fn: () => void): void {
-    this._onReconnect.push(fn);
-  }
-
-  private static _sendMessage(message: object): void {
-    const data = JSON.stringify(message);
-
-    if (this._socket.readyState === WebSocket.OPEN) {
-      this._socket.send(data);
-    } else {
-      this._messageQueue.push(data);
-    }
+  public static onReconnect(function_: () => void): void {
+    this._onReconnect.push(function_);
   }
 
   public static loginUser(
@@ -167,14 +176,70 @@ export class WebSocketService {
     });
   }
 
-  private static _handleLoginMessage = (event: MessageEvent): void => {
-    const result:
-      | AuthErrorResponse
-      | AuthResponse
-      | LogoutResponse
-      | GetActiveUsersResponse
-      | GetInactiveUsersResponse = JSON.parse(event.data);
+  public static getMessageHistory(login: string): Promise<Message[]> {
+    const id = IdCreator.getNew();
+    const request: MessageFromUserRequest = {
+      id,
+      type: RequestResponseTypes.MSG_FROM_USER,
+      payload: { user: { login } },
+    };
+    return new Promise((resolve, reject) => {
+      this._historyResponseMap.set(id, { resolve, reject });
+      this._sendMessage(request);
+    });
+  }
 
+  public static sendMessage(to: string, text: string): Promise<Message> {
+    const id = IdCreator.getNew();
+    const request: MessageSendRequest = {
+      id,
+      type: RequestResponseTypes.MSG_SEND,
+      payload: { message: { to, text } },
+    };
+
+    return new Promise((resolve, reject) => {
+      this._sendMessageResponseMap.set(id, { resolve, reject });
+      this._sendMessage(request);
+    });
+  }
+
+  public static readMessage(
+    messageId: string,
+  ): Promise<{ id: string; status: { isReaded: boolean } }> {
+    const id = IdCreator.getNew();
+    const request: MessageReadRequest = {
+      id,
+      type: RequestResponseTypes.MSG_READED,
+      payload: { message: { id: messageId } },
+    };
+    return new Promise((resolve, reject) => {
+      this._readResponseMap.set(id, { resolve, reject });
+      this._sendMessage(request);
+    });
+  }
+
+  private static _sendMessage(message: object): void {
+    const data = JSON.stringify(message);
+
+    if (this._socket.readyState === WebSocket.OPEN) {
+      this._socket.send(data);
+    } else {
+      this._messageQueue.push(data);
+    }
+  }
+
+  private static _handleMessage = (event: MessageEvent): void => {
+    const result: ServerResponse = JSON.parse(event.data);
+
+    this._handleAuth(result);
+    this._handleUsersList(result);
+    this._handleHistory(result);
+    this._handleSend(result);
+    this._handleRead(result);
+    this._messageListeners.forEach((function_) => function_(result));
+  };
+
+  private static _handleAuth(result: ServerResponse): void {
     if (
       result.type === RequestResponseTypes.Login ||
       result.type === RequestResponseTypes.Logout ||
@@ -193,6 +258,9 @@ export class WebSocketService {
         handler.reject(result.payload.error);
       }
     }
+  }
+
+  private static _handleUsersList(result: ServerResponse): void {
     if (
       result.type === RequestResponseTypes.USER_ACTIVE ||
       result.type === RequestResponseTypes.USER_INACTIVE ||
@@ -211,6 +279,32 @@ export class WebSocketService {
         handler.reject(result.payload.error);
       }
     }
-    this._messageListeners.forEach((fn) => fn(result));
-  };
+  }
+
+  private static _handleHistory(result: ServerResponse): void {
+    if (result.type === RequestResponseTypes.MSG_FROM_USER) {
+      const handler = this._historyResponseMap.get(result.id!);
+      if (!handler) return;
+      this._historyResponseMap.delete(result.id!);
+      handler.resolve(result.payload.messages);
+    }
+  }
+
+  private static _handleSend(result: ServerResponse): void {
+    if (result.type === RequestResponseTypes.MSG_SEND) {
+      const handler = this._sendMessageResponseMap.get(result.id!);
+      if (!handler) return;
+      this._sendMessageResponseMap.delete(result.id!);
+      handler.resolve(result.payload.message);
+    }
+  }
+
+  private static _handleRead(result: ServerResponse): void {
+    if (result.type === RequestResponseTypes.MSG_READED) {
+      const handler = this._readResponseMap.get(result.id!);
+      if (!handler) return;
+      this._readResponseMap.delete(result.id!);
+      handler.resolve(result.payload.message);
+    }
+  }
 }

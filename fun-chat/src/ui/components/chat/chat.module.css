@@ -17,8 +17,9 @@
   --radius-small: 10px;
   --radius-medium: 12px;
   --radius-large: 16px;
-  --font-size-sm: 0.75rem;
+  --font-size-sm: 0.6rem;
   --font-size-base: 1rem;
+  --font-size-md: 1.2rem;
   --font-size-lg: 2.2rem;
   --font-size-footer: 0.875rem;
   --padding-sm: 0.6rem;
@@ -26,7 +27,7 @@
   --padding-lg: 1.5rem;
   --transition-base: 0.3s ease;
   --status-width: 60px;
-  --messages-width: 38px;
+  --messages-width: 20px;
 }
 
 /* HEADER */
@@ -42,8 +43,8 @@
 }
 
 .chat__user-login {
-  font-size: var(--font-size-base);
-  font-weight: 400;
+  font-size: var(--font-size-md);
+  font-weight: 700;
   color: var(--color-text-muted);
 }
 
@@ -113,6 +114,8 @@
   flex-grow: 1;
   gap: 10px;
 
+  min-height: 300px;
+  max-height: 300px;
   padding: var(--padding-md);
   border-radius: var(--radius-large);
 
@@ -123,9 +126,18 @@
 .chat__user-dialog {
   cursor: pointer;
 
+  flex-grow: 1;
+  gap: 5px;
+
   width: calc((100% - 1rem) * 0.5);
   padding: var(--padding-md);
+  padding: 1.5rem;
   border-radius: var(--radius-medium);
+
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #007bff;
+  text-shadow: 0 1px 1px rgb(0 0 0 / 5%);
 
   background-color: var(--color-light-bg);
   box-shadow: 0 2px 6px rgb(0 0 0 / 3%);
@@ -133,6 +145,44 @@
   transition:
     background-color 0.2s,
     transform 0.2s;
+}
+
+.chat__dialog-header {
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+.chat__dialog-body {
+  overflow-y: auto;
+  flex-grow: 1;
+
+  min-height: 300px;
+  max-height: 300px;
+
+  background-color: #f9f9f9;
+}
+
+.chat__dialog-footer {
+  overflow-y: auto;
+  min-height: 100px;
+  max-height: 100px;
+  background-color: var(--color-disabled);
+}
+
+.chat__dialog-username {
+  background-color: #007bff;
+}
+
+.chat__dialog-status {
+  color: #42a5f5;
+}
+
+.chat__dialog-status_online {
+  background-color: #66bb6a;
+}
+
+.chat__dialog-status_offline {
+  background-color: #007bff;
 }
 
 .chat__user-dialog:hover {
@@ -187,8 +237,8 @@
 .chat__users-item-new-messages {
   width: var(--messages-width);
   height: var(--messages-width);
-  padding-top: 0.93rem;
-  border-radius: var(--radius-medium);
+  padding-top: 0.32rem;
+  border-radius: var(--radius-small);
 
   font-size: var(--font-size-sm);
   font-weight: bold;

@@ -25,6 +25,7 @@
 
 /* MAIN */
 .container_chat-main {
+  flex-grow: 1;
   gap: var(--gap-base);
   align-items: stretch;
   justify-content: space-between;

@@ -75,19 +75,6 @@ export type LogoutResponse = {
   };
 };
 
-// export type GetAuthorizedUsersRequest = {
-//   id: string;
-//   type: RequestResponseTypes.GET_AUTHORIZED_USERS;
-// };
-
-// export type GetAuthorizedUsersResponse = {
-//   id: string;
-//   type: RequestResponseTypes.GET_AUTHORIZED_USERS;
-//   payload: {
-//     users: LoginedUser[];
-//   };
-// };
-
 export type GetActiveUsersRequest = {
   id: string;
   type: RequestResponseTypes.USER_ACTIVE;
@@ -115,3 +102,98 @@ export type GetInactiveUsersResponse = {
     users: LoginedUser[];
   };
 };
+
+export type Message = {
+  id: string;
+  from: string;
+  to: string;
+  text: string;
+  datetime: number;
+  status: {
+    isDelivered: boolean;
+    isReaded: boolean;
+    isEdited: boolean;
+  };
+};
+
+export type MessageFromUserRequest = {
+  id: string;
+  type: RequestResponseTypes.MSG_FROM_USER;
+  payload: {
+    user: { login: string };
+  };
+};
+
+export type MessageFromUserResponse = {
+  id: string;
+  type: RequestResponseTypes.MSG_FROM_USER;
+  payload: {
+    messages: Message[];
+  };
+};
+
+export type MessageSendRequest = {
+  id: string;
+  type: RequestResponseTypes.MSG_SEND;
+  payload: {
+    message: {
+      to: string;
+      text: string;
+    };
+  };
+};
+
+export type MessageSendResponse = {
+  id: string;
+  type: RequestResponseTypes.MSG_SEND;
+  payload: {
+    message: Message;
+  };
+};
+
+export type MessageReadRequest = {
+  id: string;
+  type: RequestResponseTypes.MSG_READED;
+  payload: {
+    message: { id: string };
+  };
+};
+
+export type MessageReadResponse = {
+  id: string;
+  type: RequestResponseTypes.MSG_READED;
+  payload: {
+    message: {
+      id: string;
+      status: { isReaded: boolean };
+    };
+  };
+};
+
+export type MessageSendedFromServerResponse = {
+  id: null;
+  type: RequestResponseTypes.MSG_SENDED_FROM_SERVER;
+  payload: {
+    message: Message;
+  };
+};
+
+export type MessageSendPush = {
+  id: null;
+  type: RequestResponseTypes.MSG_SEND;
+  payload: {
+    message: Message;
+  };
+};
+
+export type ServerResponse =
+  | AuthErrorResponse
+  | AuthResponse
+  | LogoutResponse
+  | GetActiveUsersResponse
+  | GetInactiveUsersResponse
+  | MessageFromUserResponse
+  | MessageSendResponse
+  | MessageReadResponse
+  | MessageSendedFromServerResponse
+  | MessageSendPush;
