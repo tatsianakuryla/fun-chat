@@ -369,6 +369,12 @@
   margin-left: 0.5rem;
 }
 
+.chat__msg-delete-btn {
+  cursor: pointer;
+  border: none;
+  background: transparent;
+}
+
 @media (width <= 768px) {
   .chat__heading {
     font-size: 1.5rem;

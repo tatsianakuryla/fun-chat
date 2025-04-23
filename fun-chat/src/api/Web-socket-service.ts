@@ -50,6 +50,11 @@ export class WebSocketService {
       reject: () => void;
     }
   >();
+  private static _deleteResponseMap = new Map<
+    string,
+    { resolve: (deletedId: string) => void; reject: () => void }
+  >();
+
   private static _messageListeners: Array<(message: ServerResponse) => void> =
     [];
   private static _onDisconnect: Array<() => void> = [];
@@ -203,6 +208,19 @@ export class WebSocketService {
     });
   }
 
+  public static deleteMessage(id: string): Promise<string> {
+    const requestId = IdCreator.getNew();
+    const request = {
+      id: requestId,
+      type: RequestResponseTypes.MSG_DELETE,
+      payload: { message: { id } },
+    };
+    return new Promise((resolve, reject) => {
+      this._deleteResponseMap.set(requestId, { resolve, reject });
+      this._sendMessage(request);
+    });
+  }
+
   public static readMessage(
     messageId: string,
   ): Promise<{ id: string; status: { isReaded: boolean } }> {
@@ -236,6 +254,7 @@ export class WebSocketService {
     this._handleHistory(result);
     this._handleSend(result);
     this._handleRead(result);
+    this._handleDelete(result);
     this._messageListeners.forEach((function_) => function_(result));
   };
 
@@ -305,6 +324,16 @@ export class WebSocketService {
       if (!handler) return;
       this._readResponseMap.delete(result.id!);
       handler.resolve(result.payload.message);
+    }
+  }
+
+  private static _handleDelete(result: ServerResponse): void {
+    if (result.type === RequestResponseTypes.MSG_DELETE) {
+      const handler = this._deleteResponseMap.get(result.id!);
+      if (handler) {
+        this._deleteResponseMap.delete(result.id!);
+        handler.resolve(result.payload.messageId);
+      }
     }
   }
 }

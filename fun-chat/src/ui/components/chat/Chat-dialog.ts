@@ -56,8 +56,8 @@ export class Dialog {
       }
 
       if (message.type === RequestResponseTypes.USER_EXTERNAL_LOGIN) {
-        const loginMsg = message;
-        const other = loginMsg.payload.user;
+        const loginMessage = message;
+        const other = loginMessage.payload.user;
         if (other && other?.login === this._currentUser?.login) {
           this._updateStatus(true);
         }
@@ -65,12 +65,20 @@ export class Dialog {
       }
 
       if (message.type === RequestResponseTypes.USER_EXTERNAL_LOGOUT) {
-        const logoutMsg = message;
-        const other = logoutMsg.payload.user;
+        const logoutMessage = message;
+        const other = logoutMessage.payload.user;
         if (other && other?.login === this._currentUser?.login) {
           this._updateStatus(false);
         }
         return;
+      }
+
+      if (message.type === RequestResponseTypes.MSG_DELETED_FROM_SERVER) {
+        const deletedId = message.payload.messageId;
+        const element = this._body.querySelector(
+          `[data-msg-id="${deletedId}"]`,
+        );
+        if (element) element.remove();
       }
     });
   }
@@ -217,14 +225,31 @@ export class Dialog {
 
   private _appendMessage(message: Message): void {
     const isMine = message.from === AuthState.user?.login;
-    const messageElement = createElementWithClassId('div', [
+    const wrapper = createElementWithClassId('div', [
       style['chat__dialog-message'],
       isMine
         ? style['chat__dialog-message_sent']
         : style['chat__dialog-message_received'],
     ]);
-    messageElement.textContent = message.text;
-    this._body.append(messageElement);
+    wrapper.setAttribute('data-msg-id', message.id);
+
+    const textDiv = createElementWithClassId('div');
+    textDiv.textContent = message.text;
+    wrapper.append(textDiv);
+
+    if (isMine) {
+      const delButton = ButtonFactory.create(
+        [style['chat__msg-delete-btn']],
+        'button',
+        '🗑',
+      );
+      delButton.addEventListener('click', () => {
+        wrapper?.remove();
+        WebSocketService.deleteMessage(message.id);
+      });
+      wrapper.append(delButton);
+    }
+    this._body.append(wrapper);
     this._scrollToBottom();
   }
 

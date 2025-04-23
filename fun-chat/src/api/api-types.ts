@@ -202,6 +202,28 @@ export type UserExternalLogoutResponse = {
   };
 };
 
+export type MessageDeleteRequest = {
+  id: string;
+  type: RequestResponseTypes.MSG_DELETE;
+  payload: { message: { id: string } };
+};
+
+export type MessageDeleteResponse = {
+  id: string;
+  type: RequestResponseTypes.MSG_DELETE;
+  payload: {
+    messageId: string;
+  };
+};
+
+export type MessageDeletedFromServerResponse = {
+  id: null;
+  type: RequestResponseTypes.MSG_DELETED_FROM_SERVER;
+  payload: {
+    messageId: string;
+  };
+};
+
 export type ServerResponse =
   | AuthErrorResponse
   | AuthResponse
@@ -214,4 +236,7 @@ export type ServerResponse =
   | MessageSendedFromServerResponse
   | MessageSendPush
   | UserExternalLogoutResponse
-  | UserExternalLoginResponse;
+  | UserExternalLoginResponse
+  | MessageDeleteResponse
+  | MessageDeleteResponse
+  | MessageDeletedFromServerResponse;
