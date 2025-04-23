@@ -186,6 +186,22 @@ export type MessageSendPush = {
   };
 };
 
+export type UserExternalLoginResponse = {
+  id: null;
+  type: RequestResponseTypes.USER_EXTERNAL_LOGIN;
+  payload: {
+    user: LoginedUser;
+  };
+};
+
+export type UserExternalLogoutResponse = {
+  id: null;
+  type: RequestResponseTypes.USER_EXTERNAL_LOGOUT;
+  payload: {
+    user: LoginedUser;
+  };
+};
+
 export type ServerResponse =
   | AuthErrorResponse
   | AuthResponse
@@ -196,4 +212,6 @@ export type ServerResponse =
   | MessageSendResponse
   | MessageReadResponse
   | MessageSendedFromServerResponse
-  | MessageSendPush;
+  | MessageSendPush
+  | UserExternalLogoutResponse
+  | UserExternalLoginResponse;

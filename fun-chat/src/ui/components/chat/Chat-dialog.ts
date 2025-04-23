@@ -20,6 +20,7 @@ export class Dialog {
   private _body: HTMLElement;
   private _footer: HTMLElement;
   private _currentUser!: LoginedUser;
+  private _statusDiv!: HTMLElement;
 
   constructor() {
     this._element = createElementWithClassId('div', [
@@ -36,6 +37,10 @@ export class Dialog {
       style['chat__dialog-footer'],
     ]);
 
+    this._statusDiv = createElementWithClassId('div', [
+      style['chat__dialog-status'],
+    ]);
+
     this._element.append(this._header, this._body, this._footer);
 
     WebSocketService.onMessage((message) => {
@@ -48,6 +53,24 @@ export class Dialog {
             message.payload.message.to === this._currentUser.login))
       ) {
         this._appendMessage(message.payload.message);
+      }
+
+      if (message.type === RequestResponseTypes.USER_EXTERNAL_LOGIN) {
+        const loginMsg = message;
+        const other = loginMsg.payload.user;
+        if (other && other?.login === this._currentUser?.login) {
+          this._updateStatus(true);
+        }
+        return;
+      }
+
+      if (message.type === RequestResponseTypes.USER_EXTERNAL_LOGOUT) {
+        const logoutMsg = message;
+        const other = logoutMsg.payload.user;
+        if (other && other?.login === this._currentUser?.login) {
+          this._updateStatus(false);
+        }
+        return;
       }
     });
   }
@@ -107,14 +130,26 @@ export class Dialog {
       style['chat__dialog-username'],
     ]);
     nameDiv.textContent = user.login;
-    const statusDiv = createElementWithClassId('div', [
-      style['chat__dialog-status'],
+    this._statusDiv.classList.add(
       user.isLogined
         ? style['chat__dialog-status_online']
         : style['chat__dialog-status_offline'],
-    ]);
-    statusDiv.textContent = user.isLogined ? 'online' : 'offline';
-    this._header.append(nameDiv, statusDiv);
+    );
+    this._statusDiv.textContent = user.isLogined ? 'online' : 'offline';
+    this._statusDiv.textContent = user.isLogined ? 'online' : 'offline';
+    this._header.append(nameDiv, this._statusDiv);
+  }
+
+  private _updateStatus(isOnline: boolean): void {
+    this._statusDiv.classList.toggle(
+      style['chat__dialog-status_online'],
+      isOnline,
+    );
+    this._statusDiv.classList.toggle(
+      style['chat__dialog-status_offline'],
+      !isOnline,
+    );
+    this._statusDiv.textContent = isOnline ? 'online' : 'offline';
   }
 
   private _renderFooter(): void {

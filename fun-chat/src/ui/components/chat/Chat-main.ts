@@ -1,5 +1,10 @@
 import { FLEX_CLASS } from '../../..';
-import { type LoginedUser, RequestResponseTypes } from '../../../api/api-types';
+import {
+  type LoginedUser,
+  type Message,
+  RequestResponseTypes,
+  type ServerResponse,
+} from '../../../api/api-types';
 import { WebSocketService } from '../../../api/Web-socket-service';
 import { AuthState } from '../../../core/auth/Auth-state';
 import { AuthFormFields, UserStatus } from '../../../types';
@@ -25,19 +30,33 @@ export class ChatMain {
     this.renderUsersList();
     this._dialog = new Dialog();
     this._dialog.showPlaceholder('Choose a recipient');
-    WebSocketService.onMessage((message) => {
-      if (message.type !== RequestResponseTypes.MSG_SEND) return;
-      const m = message.payload.message;
-      if (m.from === AuthState.user?.login) return;
+    // WebSocketService.onMessage((message) => {
+    //   if (message.type !== RequestResponseTypes.MSG_SEND) return;
+    //   const m = message.payload.message;
+    //   if (m.from === AuthState.user?.login) return;
 
-      if (this._dialog.currentUser?.login === m.from) {
-        WebSocketService.readMessage(m.id).catch(() => {});
-      } else {
-        const previous = ChatMain._unreadMap.get(m.from) || 0;
-        ChatMain._unreadMap.set(m.from, previous + 1);
-        this.renderUsersList();
+    //   if (this._dialog.currentUser?.login === m.from) {
+    //     WebSocketService.readMessage(m.id).catch(() => {});
+    //   } else {
+    //     const previous = ChatMain._unreadMap.get(m.from) || 0;
+    //     ChatMain._unreadMap.set(m.from, previous + 1);
+    //     this.renderUsersList();
+    //   }
+    // });
+
+    WebSocketService.onMessage((message: ServerResponse) => {
+      switch (message.type) {
+        case RequestResponseTypes.MSG_SEND:
+          this._handleIncomingMessage(message.payload.message);
+          break;
+
+        case RequestResponseTypes.USER_EXTERNAL_LOGIN:
+        case RequestResponseTypes.USER_EXTERNAL_LOGOUT:
+          this.renderUsersList();
+          break;
       }
     });
+    WebSocketService.onReconnect(() => this.renderUsersList());
   }
 
   private static _createUserListItem(
@@ -156,5 +175,18 @@ export class ChatMain {
     ChatMain._unreadMap.set(user.login, 0);
     this.renderUsersList();
     this._dialog.openWith(user);
+  }
+
+  private _handleIncomingMessage(message: Message): void {
+    const from = message.from;
+    if (from === AuthState.user?.login) return;
+
+    if (this._dialog.currentUser?.login === from) {
+      WebSocketService.readMessage(message.id).catch(() => {});
+    } else {
+      const previous = ChatMain._unreadMap.get(from) || 0;
+      ChatMain._unreadMap.set(from, previous + 1);
+      this.renderUsersList();
+    }
   }
 }
