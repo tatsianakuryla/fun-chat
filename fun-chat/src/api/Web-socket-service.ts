@@ -1,3 +1,8 @@
+import {
+  errorNotificationClass,
+  SERVER_ERROR_TEXTCONTENT,
+  SERVER_SUCCESS_INFO,
+} from '..';
 import { AuthState } from '../core/auth/Auth-state';
 import { IdCreator } from '../core/id-creator/id-creator';
 import {
@@ -97,7 +102,13 @@ export class WebSocketService {
 
     this._socket.addEventListener('message', this._handleMessage);
 
+    this._socket.addEventListener('error', () => {
+      errorNotificationClass.open(SERVER_ERROR_TEXTCONTENT);
+      this._socket.close();
+    });
+
     this._socket.addEventListener('close', () => {
+      errorNotificationClass.open(SERVER_ERROR_TEXTCONTENT);
       this._onDisconnect.forEach((function_) => function_());
 
       if (this._shouldReconnect) {
@@ -107,10 +118,6 @@ export class WebSocketService {
           this._maxReconnectDelay,
         );
       }
-    });
-
-    this._socket.addEventListener('error', () => {
-      this._socket.close();
     });
   }
 

@@ -1,4 +1,4 @@
-import { FLEX_CLASS } from '../..';
+import { errorNotificationClass, FLEX_CLASS } from '../..';
 import { createElementWithClassId } from '../../utils/helpers';
 
 export class PrimaryLayout {
@@ -25,6 +25,11 @@ export class PrimaryLayout {
   }
 
   public render(): void {
-    document.body.append(this._header, this._main, this._footer);
+    document.body.append(
+      this._header,
+      this._main,
+      this._footer,
+      errorNotificationClass.errorNotification,
+    );
   }
 }

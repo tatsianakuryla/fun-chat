@@ -9,22 +9,33 @@ import { AuthState } from './core/auth/Auth-state';
 import { PrimaryLayout } from './ui/layouts/primary-layout';
 import { ChatPage } from './ui/pages/Chat-page';
 import { AboutPage } from './ui/pages/About-page';
+import { ErrorNotification } from './ui/components/error-notification/Error-notification';
 
 export const FLEX_CLASS = 'flex';
+export const SERVER_ERROR_TEXTCONTENT =
+  'Connection lost. Attempting to reconnect...';
+export const SERVER_SUCCESS_INFO = 'Connection established successfully.';
 export const primaryLayout = new PrimaryLayout();
 export const authPage = new AuthPage();
 export const chatPage = new ChatPage();
 export const aboutPage = new AboutPage();
+export const errorNotificationClass = new ErrorNotification();
 
 function appInit(): void {
   AuthState.init();
 
   WebSocketService.onDisconnect(() => {
-    // ERROR
+    errorNotificationClass.open(SERVER_ERROR_TEXTCONTENT);
   });
 
   WebSocketService.onReconnect(() => {
-    // HIDE ERROR
+    const user = AuthState.user;
+    const pw = AuthState.password;
+    if (user && pw) {
+      WebSocketService.loginUser(user.login, pw).then((u) =>
+        AuthState.setUser(u, pw),
+      );
+    }
   });
 
   WebSocketService.connect();

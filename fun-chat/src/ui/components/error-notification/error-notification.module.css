@@ -1,0 +1,44 @@
+.app__error-modal {
+  pointer-events: none;
+
+  position: fixed;
+  z-index: 9999;
+  bottom: 20px;
+  left: 20px;
+  transform: translateY(20px);
+
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+
+  min-width: 180px;
+  max-width: 300px;
+  min-height: 48px;
+  padding: 0.75rem 1rem;
+  border: 2px solid var(--color-danger);
+  border-radius: var(--radius-small);
+
+  font-family: var(--font-main);
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--color-danger);
+
+  opacity: 0;
+  background-color: var(--bg-white);
+  box-shadow: 0 4px 12px rgb(0 0 0 / 15%);
+
+  transition:
+    opacity 0.3s ease,
+    transform 0.3s ease;
+}
+
+.app__error-text {
+  color: inherit;
+}
+
+.show {
+  pointer-events: auto;
+  transform: translateY(0);
+  visibility: visible;
+  opacity: 1;
+}
