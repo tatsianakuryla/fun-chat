@@ -113,6 +113,8 @@ export class ChatMain {
 
   public renderUsersList(): void {
     ChatMain._getAllUsers().then((users) => {
+      console.log('Все юзеры от сервера:', users);
+      console.log('Текущий логин из AuthState:', AuthState.user?.login);
       this._usersList.replaceChildren();
       const withoutCurrentUser = users
         .filter((user) => user.login !== AuthState.user?.login)
@@ -122,6 +124,7 @@ export class ChatMain {
             .includes(this._searchTerm.trim().toLowerCase()),
         );
 
+      console.log('После фильтрации:', withoutCurrentUser);
       const userItemsPromises = withoutCurrentUser.map(async (user) => {
         const login = user.login;
         const status = user.isLogined ? UserStatus.Online : UserStatus.Offline;

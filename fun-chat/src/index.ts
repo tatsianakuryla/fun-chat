@@ -28,16 +28,6 @@ function appInit(): void {
     errorNotificationClass.open(SERVER_ERROR_TEXTCONTENT);
   });
 
-  WebSocketService.onReconnect(() => {
-    const user = AuthState.user;
-    const pw = AuthState.password;
-    if (user && pw) {
-      WebSocketService.loginUser(user.login, pw).then((u) =>
-        AuthState.setUser(u, pw),
-      );
-    }
-  });
-
   WebSocketService.connect();
   primaryLayout.render();
 

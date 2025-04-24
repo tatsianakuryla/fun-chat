@@ -275,6 +275,7 @@ export class WebSocketService {
 
   private static _handleMessage = (event: MessageEvent): void => {
     const result: ServerResponse = JSON.parse(event.data);
+    console.log('WS onMessage:', result);
     this._handleAuth(result);
     this._handleUsersList(result);
     this._handleHistory(result);
