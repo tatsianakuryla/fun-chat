@@ -31,6 +31,15 @@
   justify-content: space-between;
 }
 
+.container_about-main {
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.container_auth-form {
+  flex-direction: column;
+}
+
 /* FOOTER */
 .container_chat-footer {
   flex-flow: column wrap;

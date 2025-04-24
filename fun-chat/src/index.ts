@@ -8,11 +8,13 @@ import { AuthPage } from './ui/pages/Auth-page';
 import { AuthState } from './core/auth/Auth-state';
 import { PrimaryLayout } from './ui/layouts/primary-layout';
 import { ChatPage } from './ui/pages/Chat-page';
+import { AboutPage } from './ui/pages/About-page';
 
 export const FLEX_CLASS = 'flex';
 export const primaryLayout = new PrimaryLayout();
 export const authPage = new AuthPage();
 export const chatPage = new ChatPage();
+export const aboutPage = new AboutPage();
 
 function appInit(): void {
   AuthState.init();
@@ -45,7 +47,7 @@ function appInit(): void {
   });
 
   Router.addRoute(Routes.About, () => {
-    /* ... */
+    aboutPage.open();
   });
 
   Router.init();

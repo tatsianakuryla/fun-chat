@@ -107,6 +107,11 @@
     transform 0.2s;
 }
 
+.chat__logout-wrapper {
+  flex-direction: row;
+  gap: 5px;
+}
+
 .chat__search-input:focus {
   transform: scale(1.02);
   outline: none;

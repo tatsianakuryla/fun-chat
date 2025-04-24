@@ -1,0 +1,45 @@
+.about__title {
+  margin-bottom: 0.5rem;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--color-text-main);
+}
+
+.about__info {
+  margin-bottom: 1rem;
+  font-size: 1rem;
+  line-height: 1.5;
+  color: var(--color-text-muted);
+}
+
+.about__author-info {
+  font-size: 0.8rem;
+  font-style: italic;
+  color: #999;
+}
+
+.about-link {
+  cursor: pointer;
+
+  padding: var(--padding-sm) var(--padding-md);
+  border: 2px solid var(--color-danger);
+  border-radius: var(--radius-small);
+
+  font-weight: 700;
+  color: var(--color-danger);
+
+  background: rgb(255 255 255 / 15%);
+
+  transition:
+    background-color var(--transition-base),
+    transform var(--transition-base),
+    box-shadow var(--transition-base),
+    color var(--transition-base);
+}
+
+.about-link:hover {
+  transform: scale(1.05);
+  color: var(--color-light-bg);
+  background-color: var(--color-danger);
+  box-shadow: 0 4px 10px var(--color-danger-light);
+}

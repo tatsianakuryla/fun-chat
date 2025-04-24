@@ -1,8 +1,9 @@
 import { primaryLayout } from '../..';
+import { About } from '../components/about/about';
 import { AuthForm } from '../components/auth-form/Auth-form';
 import { Chat } from '../components/chat/Сhat';
 
-export abstract class BasePage<T extends Chat | AuthForm> {
+export abstract class BasePage<T extends Chat | AuthForm | About> {
   protected _element: T | null;
 
   constructor() {
@@ -33,6 +34,12 @@ export abstract class BasePage<T extends Chat | AuthForm> {
     }
 
     if (this._element instanceof AuthForm) {
+      if (primaryLayout.main.contains(this._element.mainContainer)) {
+        primaryLayout.main.removeChild(this._element.mainContainer);
+      }
+    }
+
+    if (this._element instanceof About) {
       if (primaryLayout.main.contains(this._element.mainContainer)) {
         primaryLayout.main.removeChild(this._element.mainContainer);
       }

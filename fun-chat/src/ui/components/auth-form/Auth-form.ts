@@ -13,6 +13,7 @@ import { LocalStorage } from '../../../core/local-storge/Local-storage';
 import { LocalStorageKeys } from '../../../core/local-storge/local-storage-types';
 import { AuthState } from '../../../core/auth/Auth-state';
 import { WebSocketService } from '../../../api/Web-socket-service';
+import { AboutLinkFactory } from '../about/about-link';
 
 export class AuthForm {
   private static readonly SPACE_REGEX = /\s/g;
@@ -47,7 +48,7 @@ export class AuthForm {
   constructor() {
     this._form = this._createForm();
     this._implementEventListeners();
-    this._mainContainer.append(this._form);
+    this._mainContainer.append(AboutLinkFactory.createAboutLink(), this._form);
     this._inputsValidation();
     this._cleanInputs();
     this._updateSubmitButton();

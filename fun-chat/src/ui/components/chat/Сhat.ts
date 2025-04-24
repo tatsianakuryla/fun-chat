@@ -8,6 +8,8 @@ import style from './chat.module.css';
 import { ChatFooterFactory } from './Chat-footer';
 import { ChatHeaderFactory } from './Chat-header';
 import { ChatMain } from './Chat-main';
+import { AboutLinkFactory } from '../about/about-link';
+import { FLEX_CLASS } from '../../..';
 
 export class Chat {
   private _headerContainer = ChatHeaderFactory.createContainer();
@@ -49,6 +51,7 @@ export class Chat {
   private _createLogoutButton(): HTMLElement {
     const wrapper = createElementWithClassId('div', [
       style['chat__logout-wrapper'],
+      FLEX_CLASS,
     ]);
 
     const button = ButtonFactory.create(
@@ -77,7 +80,11 @@ export class Chat {
         });
     });
 
-    wrapper.append(this._logoutErrorMessage, button);
+    wrapper.append(
+      this._logoutErrorMessage,
+      button,
+      AboutLinkFactory.createAboutLink(),
+    );
 
     return wrapper;
   }
