@@ -16,10 +16,6 @@ export enum RequestResponseTypes {
 
   USER_EXTERNAL_LOGIN = 'USER_EXTERNAL_LOGIN',
   USER_EXTERNAL_LOGOUT = 'USER_EXTERNAL_LOGOUT',
-  MSG_READED_FROM_SERVER = 'MSG_READED_FROM_SERVER',
-  MSG_DELETED_FROM_SERVER = 'MSG_DELETED_FROM_SERVER',
-  MSG_EDITED_FROM_SERVER = 'MSG_EDITED_FROM_SERVER',
-  MSG_SENDED_FROM_SERVER = 'MSG_SENDED_FROM_SERVER',
   MSG_DELIVERED = 'MSG_DELIVER',
   Error = 'ERROR',
 }
@@ -151,38 +147,33 @@ export type MessageSendResponse = {
   };
 };
 
+export type MessageSendBroadcast = {
+  id: null;
+  type: RequestResponseTypes.MSG_SEND;
+  payload: {
+    message: Message;
+  };
+};
+
 export type MessageReadRequest = {
   id: string;
   type: RequestResponseTypes.MSG_READED;
-  payload: {
-    message: { id: string };
-  };
+  payload: { message: { id: string } };
 };
 
 export type MessageReadResponse = {
   id: string;
   type: RequestResponseTypes.MSG_READED;
   payload: {
-    message: {
-      id: string;
-      status: { isReaded: boolean };
-    };
+    message: { id: string; status: { isReaded: boolean } };
   };
 };
 
-export type MessageSendedFromServerResponse = {
+export type MessageReadBroadcast = {
   id: null;
-  type: RequestResponseTypes.MSG_SENDED_FROM_SERVER;
+  type: RequestResponseTypes.MSG_READED;
   payload: {
-    message: Message;
-  };
-};
-
-export type MessageSendPush = {
-  id: null;
-  type: RequestResponseTypes.MSG_SEND;
-  payload: {
-    message: Message;
+    message: { id: string; status: { isReaded: boolean } };
   };
 };
 
@@ -212,50 +203,46 @@ export type MessageDeleteResponse = {
   id: string;
   type: RequestResponseTypes.MSG_DELETE;
   payload: {
-    messageId: string;
+    message: {
+      id: string;
+      status: { isDeleted: boolean };
+    };
   };
 };
 
-export type MessageDeletedFromServerResponse = {
+export type MessageDeleteBroadcast = {
   id: null;
-  type: RequestResponseTypes.MSG_DELETED_FROM_SERVER;
+  type: RequestResponseTypes.MSG_DELETE;
   payload: {
-    messageId: string;
+    message: {
+      id: string;
+      status: { isDeleted: boolean };
+    };
   };
 };
 
 export type MessageEditRequest = {
   id: string;
   type: RequestResponseTypes.MSG_EDIT;
-  payload: {
-    message: {
-      id: string;
-      text: string;
-    };
-  };
+  payload: { message: { id: string; text: string } };
 };
 
 export type MessageEditResponse = {
   id: string;
   type: RequestResponseTypes.MSG_EDIT;
-  payload: {
-    message: Message;
-  };
+  payload: { message: Message };
 };
 
-export type MessageEditedFromServerResponse = {
+export type MessageEditBroadcast = {
   id: null;
-  type: RequestResponseTypes.MSG_EDITED_FROM_SERVER;
+  type: RequestResponseTypes.MSG_EDIT;
   payload: {
-    message: { id: string; text: string; datetime: number };
-  };
-};
-
-export type MessageReadFromServerResponse = {
-  id: null;
-  type: RequestResponseTypes.MSG_READED_FROM_SERVER;
-  payload: {
-    message: { id: string };
+    message: {
+      id: string;
+      text: string;
+      status: { isEdited: boolean };
+      datetime: number;
+    };
   };
 };
 
@@ -268,13 +255,11 @@ export type ServerResponse =
   | MessageFromUserResponse
   | MessageSendResponse
   | MessageReadResponse
-  | MessageSendedFromServerResponse
-  | MessageSendPush
   | UserExternalLogoutResponse
   | UserExternalLoginResponse
   | MessageDeleteResponse
-  | MessageDeleteResponse
-  | MessageDeletedFromServerResponse
   | MessageEditResponse
-  | MessageEditedFromServerResponse
-  | MessageReadFromServerResponse;
+  | MessageEditBroadcast
+  | MessageDeleteBroadcast
+  | MessageSendBroadcast
+  | MessageReadBroadcast;

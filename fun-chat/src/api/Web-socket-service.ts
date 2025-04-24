@@ -349,20 +349,22 @@ export class WebSocketService {
 
   private static _handleDelete(result: ServerResponse): void {
     if (result.type === RequestResponseTypes.MSG_DELETE) {
-      const handler = this._deleteResponseMap.get(result.payload.messageId);
+      const handler = this._deleteResponseMap.get(result.payload.message.id);
       if (handler) {
-        this._deleteResponseMap.delete(result.payload.messageId);
-        handler.resolve(result.payload.messageId);
+        this._deleteResponseMap.delete(result.payload.message.id);
+        handler.resolve(result.payload.message.id);
       }
     }
   }
 
   private static _handleEdit(result: ServerResponse): void {
-    if (result.type === RequestResponseTypes.MSG_EDIT) {
-      const handle = this._editResponseMap.get(result.id!);
-      if (!handle) return;
-      this._editResponseMap.delete(result.id!);
-      handle.resolve(result.payload.message);
+    if (result.type !== RequestResponseTypes.MSG_EDIT) return;
+    const requestId = result.id;
+    if (requestId) {
+      const handler = this._editResponseMap.get(requestId);
+      if (!handler) return;
+      this._editResponseMap.delete(requestId);
+      handler.resolve(result.payload.message);
     }
   }
 }

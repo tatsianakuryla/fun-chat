@@ -20,8 +20,7 @@ export class Dialog {
   private _body: HTMLElement;
   private _footer: HTMLElement;
   private _currentUser!: LoginedUser;
-  private _statusDiv!: HTMLElement;
-  private _currentlyEditingId: string | null = null;
+  private _statusDiv: HTMLElement;
 
   constructor() {
     this._element = createElementWithClassId('div', [
@@ -74,20 +73,20 @@ export class Dialog {
         return;
       }
 
-      if (message.type === RequestResponseTypes.MSG_DELETED_FROM_SERVER) {
-        const deletedId = message.payload.messageId;
+      if (message.type === RequestResponseTypes.MSG_DELETE) {
+        const deletedId = message.payload.message.id;
         const element = this._body.querySelector(
           `[data-msg-id="${deletedId}"]`,
         );
         if (element) element.remove();
       }
 
-      if (message.type === RequestResponseTypes.MSG_EDITED_FROM_SERVER) {
+      if (message.type === RequestResponseTypes.MSG_EDIT) {
         const m = message.payload.message;
         this._applyEdit(m.id, m.text);
       }
 
-      if (message.type === RequestResponseTypes.MSG_READED_FROM_SERVER) {
+      if (message.type === RequestResponseTypes.MSG_READED) {
         const readId = message.payload.message.id;
         const wrapper = this._body.querySelector(`[data-msg-id="${readId}"]`);
         if (wrapper) {
