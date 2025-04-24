@@ -84,7 +84,16 @@ export class Dialog {
 
       if (message.type === RequestResponseTypes.MSG_EDITED_FROM_SERVER) {
         const m = message.payload.message;
-        this._applyEdit(m.id, m.text, m.datetime);
+        this._applyEdit(m.id, m.text);
+      }
+
+      if (message.type === RequestResponseTypes.MSG_READED_FROM_SERVER) {
+        const readId = message.payload.message.id;
+        const wrapper = this._body.querySelector(`[data-msg-id="${readId}"]`);
+        if (wrapper) {
+          const statusElement = wrapper.querySelector('.msg-status');
+          if (statusElement) statusElement.textContent = 'read';
+        }
       }
     });
   }
@@ -239,49 +248,83 @@ export class Dialog {
     ]);
     wrapper.setAttribute('data-msg-id', message.id);
 
+    const metaDiv = createElementWithClassId('div', [style['chat__msg-meta']]);
+    const userSpan = createElementWithClassId('span', [
+      style['chat__msg-username'],
+    ]);
+    userSpan.textContent = message.from;
+    const timeSpan = createElementWithClassId('span', [
+      style['chat__msg-time'],
+    ]);
+    timeSpan.textContent = new Date(message.datetime).toLocaleString();
+    metaDiv.append(userSpan, timeSpan);
+
+    if (isMine) {
+      const statusSpan = createElementWithClassId('span', ['msg-status']);
+      statusSpan.textContent = message.status.isReaded
+        ? 'read'
+        : this._currentUser.isLogined
+          ? 'delivered'
+          : 'sent';
+      metaDiv.append(statusSpan);
+    }
+    wrapper.append(metaDiv);
+
     const textDiv = createElementWithClassId('div', [
       style['chat__dialog-text'],
     ]);
     textDiv.textContent = message.text;
     wrapper.append(textDiv);
 
+    let editButton: HTMLButtonElement | null = null;
+    if (isMine) {
+      const actions = createElementWithClassId('div', [
+        style['chat__dialog-actions'],
+      ]);
+
+      editButton = ButtonFactory.create(
+        [style['chat__msg-edit-btn']],
+        'button',
+        '✏️',
+      );
+      editButton.classList.add('edit-btn');
+      editButton.addEventListener('click', () =>
+        this._startEdit(message.id, textDiv),
+      );
+      actions.append(editButton);
+
+      const delButton = ButtonFactory.create(
+        [style['chat__msg-delete-btn']],
+        'button',
+        '🗑',
+      );
+      delButton.addEventListener('click', () => {
+        wrapper.remove();
+        WebSocketService.deleteMessage(message.id);
+      });
+      actions.append(delButton);
+
+      wrapper.append(actions);
+    }
+
     if (message.status.isEdited) {
       const mark = document.createElement('span');
       mark.className = 'edited-mark';
       mark.textContent = 'edited';
       mark.setAttribute('aria-hidden', 'true');
-      textDiv.after(mark);
-    }
 
-    if (isMine) {
-      const editBtn = ButtonFactory.create(
-        [style['chat__msg-edit-btn']],
-        'button',
-        '✏️',
-      );
-      editBtn.classList.add('edit-btn');
-      editBtn.addEventListener('click', () =>
-        this._startEdit(message.id, textDiv),
-      );
-      wrapper.append(editBtn);
-
-      const delBtn = ButtonFactory.create(
-        [style['chat__msg-delete-btn']],
-        'button',
-        '🗑',
-      );
-      delBtn.addEventListener('click', () => {
-        wrapper.remove();
-        WebSocketService.deleteMessage(message.id);
-      });
-      wrapper.append(delBtn);
+      if (editButton) {
+        editButton.after(mark);
+      } else {
+        textDiv.after(mark);
+      }
     }
 
     this._body.append(wrapper);
     this._scrollToBottom();
   }
 
-  private _startEdit(msgId: string, textDiv: HTMLElement) {
+  private _startEdit(messageId: string, textDiv: HTMLElement): void {
     const oldText = textDiv.textContent!;
     const input = document.createElement('input');
     input.value = oldText;
@@ -289,29 +332,25 @@ export class Dialog {
     textDiv.replaceWith(input);
     input.focus();
 
-    const cleanup = () => {
+    const cleanup = (): void => {
       input.removeEventListener('blur', save);
       input.removeEventListener('keydown', onKeyDown);
     };
 
-    const save = () => {
+    const save = (): void => {
       cleanup();
       const newText = input.value.trim();
-      if (!newText) {
-        input.replaceWith(textDiv);
-        return;
-      }
-      WebSocketService.editMessage(msgId, newText)
-        .then((editedMsg) => {
-          input.replaceWith(textDiv);
-          this._applyEdit(msgId, editedMsg.text, editedMsg.datetime);
-        })
-        .catch(console.error);
+      input.replaceWith(textDiv);
+      if (!newText || newText === oldText) return;
+      WebSocketService.editMessage(messageId, newText).then((editedMessage) => {
+        this._applyEdit(messageId, editedMessage.text);
+      });
+      // .catch(console.error);
     };
 
-    const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Enter') {
-        e.preventDefault();
+    const onKeyDown = (event: KeyboardEvent): void => {
+      if (event.key === 'Enter') {
+        event.preventDefault();
         save();
       }
     };
@@ -320,19 +359,22 @@ export class Dialog {
     input.addEventListener('keydown', onKeyDown);
   }
 
-  private _applyEdit(msgId: string, newText: string, datetime: number) {
-    const wrapper = this._body.querySelector(`[data-msg-id=\"${msgId}\"]`);
+  private _applyEdit(messageId: string, newText: string): void {
+    const wrapper = this._body.querySelector(`[data-msg-id="${messageId}"]`);
     if (!wrapper) return;
-    const textDiv = wrapper.querySelector(`.${style['chat__dialog-text']}`)!;
-    textDiv.textContent = newText;
 
-    const editBtn = wrapper.querySelector('button.edit-btn');
-    if (editBtn && !wrapper.querySelector('.edited-mark')) {
+    const textDiv = wrapper.querySelector(`.${style['chat__dialog-text']}`);
+    if (textDiv) {
+      textDiv.textContent = newText;
+    }
+
+    const editButton = wrapper.querySelector('button.edit-btn');
+    if (editButton && !wrapper.querySelector('.edited-mark')) {
       const mark = document.createElement('span');
       mark.className = 'edited-mark';
       mark.textContent = 'edited';
       mark.setAttribute('aria-hidden', 'true');
-      editBtn.after(mark);
+      editButton.after(mark);
     }
   }
 

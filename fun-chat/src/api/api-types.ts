@@ -251,6 +251,14 @@ export type MessageEditedFromServerResponse = {
   };
 };
 
+export type MessageReadFromServerResponse = {
+  id: null;
+  type: RequestResponseTypes.MSG_READED_FROM_SERVER;
+  payload: {
+    message: { id: string };
+  };
+};
+
 export type ServerResponse =
   | AuthErrorResponse
   | AuthResponse
@@ -268,4 +276,5 @@ export type ServerResponse =
   | MessageDeleteResponse
   | MessageDeletedFromServerResponse
   | MessageEditResponse
-  | MessageEditedFromServerResponse;
+  | MessageEditedFromServerResponse
+  | MessageReadFromServerResponse;

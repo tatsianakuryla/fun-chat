@@ -243,6 +243,19 @@ export class WebSocketService {
     });
   }
 
+  public static editMessage(id: string, text: string): Promise<Message> {
+    const requestId = IdCreator.getNew();
+    const request: MessageEditRequest = {
+      id: requestId,
+      type: RequestResponseTypes.MSG_EDIT,
+      payload: { message: { id, text } },
+    };
+    return new Promise((resolve, reject) => {
+      this._editResponseMap.set(requestId, { resolve, reject });
+      this._sendMessage(request);
+    });
+  }
+
   private static _sendMessage(message: object): void {
     const data = JSON.stringify(message);
 
@@ -255,7 +268,6 @@ export class WebSocketService {
 
   private static _handleMessage = (event: MessageEvent): void => {
     const result: ServerResponse = JSON.parse(event.data);
-    console.log(result);
     this._handleAuth(result);
     this._handleUsersList(result);
     this._handleHistory(result);
@@ -343,19 +355,6 @@ export class WebSocketService {
         handler.resolve(result.payload.messageId);
       }
     }
-  }
-
-  public static editMessage(id: string, text: string): Promise<Message> {
-    const reqId = IdCreator.getNew();
-    const request: MessageEditRequest = {
-      id: reqId,
-      type: RequestResponseTypes.MSG_EDIT,
-      payload: { message: { id, text } },
-    };
-    return new Promise((resolve, reject) => {
-      this._editResponseMap.set(reqId, { resolve, reject });
-      this._sendMessage(request);
-    });
   }
 
   private static _handleEdit(result: ServerResponse): void {

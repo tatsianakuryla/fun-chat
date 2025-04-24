@@ -387,6 +387,67 @@
   width: 100%;
 }
 
+.chat__dialog-username {
+  font-size: var(--font-size-md);
+  color: var(--color-primary);
+}
+
+.chat__msg-meta {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+
+  margin-bottom: 0.25rem;
+
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+}
+
+.chat__msg-username {
+  font-weight: 600;
+  color: var(--color-login);
+}
+
+.chat__msg-time {
+  font-style: italic;
+}
+
+.msg-status {
+  margin-left: auto;
+  font-size: 0.7rem;
+  color: var(--color-accent);
+}
+
+.chat__dialog-text {
+  font-size: var(--font-size-base);
+  line-height: 1.4;
+  color: var(--color-text-main);
+}
+
+.chat__dialog-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.25rem;
+}
+
+.edit-btn {
+  cursor: pointer;
+  font-size: 0.75rem;
+  color: var(--color-accent-light);
+  transition: color 0.2s;
+}
+
+.edit-btn:hover {
+  color: var(--color-accent);
+}
+
+.edited-mark {
+  margin-left: 0.5rem;
+  font-size: 0.7rem;
+  font-style: italic;
+  color: var(--color-text-muted);
+}
+
 @media (width <= 768px) {
   .chat__heading {
     font-size: 1.5rem;
