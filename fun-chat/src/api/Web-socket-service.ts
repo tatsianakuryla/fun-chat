@@ -248,7 +248,7 @@ export class WebSocketService {
 
   private static _handleMessage = (event: MessageEvent): void => {
     const result: ServerResponse = JSON.parse(event.data);
-
+    console.log(result);
     this._handleAuth(result);
     this._handleUsersList(result);
     this._handleHistory(result);
@@ -329,9 +329,9 @@ export class WebSocketService {
 
   private static _handleDelete(result: ServerResponse): void {
     if (result.type === RequestResponseTypes.MSG_DELETE) {
-      const handler = this._deleteResponseMap.get(result.id!);
+      const handler = this._deleteResponseMap.get(result.payload.messageId);
       if (handler) {
-        this._deleteResponseMap.delete(result.id!);
+        this._deleteResponseMap.delete(result.payload.messageId);
         handler.resolve(result.payload.messageId);
       }
     }
