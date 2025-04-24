@@ -13,6 +13,7 @@ import {
   type AuthRequest,
   type LoginedUser,
   type LogoutRequest,
+  type MessageEditRequest,
 } from './api-types';
 
 export class WebSocketService {
@@ -52,9 +53,19 @@ export class WebSocketService {
   >();
   private static _deleteResponseMap = new Map<
     string,
-    { resolve: (deletedId: string) => void; reject: () => void }
+    { resolve: (id: string) => void; reject: () => void }
   >();
-
+  private static _editResponseMap = new Map<
+    string,
+    {
+      resolve: (message: {
+        id: string;
+        text: string;
+        datetime: number;
+      }) => void;
+      reject: () => void;
+    }
+  >();
   private static _messageListeners: Array<(message: ServerResponse) => void> =
     [];
   private static _onDisconnect: Array<() => void> = [];
@@ -255,6 +266,7 @@ export class WebSocketService {
     this._handleSend(result);
     this._handleRead(result);
     this._handleDelete(result);
+    this._handleEdit(result);
     this._messageListeners.forEach((function_) => function_(result));
   };
 
@@ -334,6 +346,31 @@ export class WebSocketService {
         this._deleteResponseMap.delete(result.payload.messageId);
         handler.resolve(result.payload.messageId);
       }
+    }
+  }
+
+  public static editMessage(
+    id: string,
+    newText: string,
+  ): Promise<{ id: string; text: string; datetime: number }> {
+    const reqId = IdCreator.getNew();
+    const request: MessageEditRequest = {
+      id: reqId,
+      type: RequestResponseTypes.MSG_EDIT,
+      payload: { message: { id, newText } },
+    };
+    return new Promise((resolve, reject) => {
+      this._editResponseMap.set(reqId, { resolve, reject });
+      this._sendMessage(request);
+    });
+  }
+
+  private static _handleEdit(result: ServerResponse): void {
+    if (result.type === RequestResponseTypes.MSG_EDIT) {
+      const handler = this._editResponseMap.get(result.id!);
+      if (!handler) return;
+      this._editResponseMap.delete(result.id!);
+      handler.resolve(result.payload.message);
     }
   }
 }

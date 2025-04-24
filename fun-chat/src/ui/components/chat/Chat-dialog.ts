@@ -21,6 +21,7 @@ export class Dialog {
   private _footer: HTMLElement;
   private _currentUser!: LoginedUser;
   private _statusDiv!: HTMLElement;
+  private _currentlyEditingId: string | null = null;
 
   constructor() {
     this._element = createElementWithClassId('div', [
@@ -79,6 +80,11 @@ export class Dialog {
           `[data-msg-id="${deletedId}"]`,
         );
         if (element) element.remove();
+      }
+
+      if (message.type === RequestResponseTypes.MSG_EDITED_FROM_SERVER) {
+        const { id, text, datetime } = message.payload.message;
+        this._applyEdit(id, text, datetime);
       }
     });
   }
@@ -238,6 +244,16 @@ export class Dialog {
     wrapper.append(textDiv);
 
     if (isMine) {
+      const editBtn = ButtonFactory.create(
+        [style['chat__msg-edit-btn']],
+        'button',
+        '✏️',
+      );
+      editBtn.addEventListener('click', () =>
+        this._startEdit(message.id, textDiv),
+      );
+      wrapper.append(editBtn);
+
       const delButton = ButtonFactory.create(
         [style['chat__msg-delete-btn']],
         'button',
@@ -251,6 +267,44 @@ export class Dialog {
     }
     this._body.append(wrapper);
     this._scrollToBottom();
+  }
+
+  private _startEdit(msgId: string, textDiv: HTMLElement) {
+    const oldText = textDiv.textContent!;
+    const input = document.createElement('input');
+    input.value = oldText;
+    input.className = style['chat__edit-input'];
+    textDiv.replaceWith(input);
+    input.focus();
+
+    const save = () => {
+      const newText = input.value.trim();
+      if (!newText || newText === oldText) {
+        input.replaceWith(textDiv);
+        return;
+      }
+      WebSocketService.editMessage(msgId, newText)
+        .then((editedMsg) => {
+          this._applyEdit(msgId, editedMsg.text, editedMsg.datetime);
+        })
+        .catch(console.error);
+    };
+
+    input.addEventListener('blur', save);
+    input.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        save();
+      }
+    });
+  }
+
+  private _applyEdit(msgId: string, newText: string, datetime: number) {
+    const wrapper = this._body.querySelector(`[data-msg-id="${msgId}"]`);
+    if (!wrapper) return;
+    const textDiv = wrapper.querySelector('div')!;
+    textDiv.textContent = newText;
+    wrapper.classList.add(style['chat__message_edited']);
   }
 
   private _scrollToBottom(): void {

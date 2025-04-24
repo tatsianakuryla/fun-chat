@@ -224,6 +224,30 @@ export type MessageDeletedFromServerResponse = {
   };
 };
 
+export type MessageEditRequest = {
+  id: string;
+  type: RequestResponseTypes.MSG_EDIT;
+  payload: {
+    message: { id: string; newText: string };
+  };
+};
+
+export type MessageEditResponse = {
+  id: string;
+  type: RequestResponseTypes.MSG_EDIT;
+  payload: {
+    message: { id: string; text: string; datetime: number };
+  };
+};
+
+export type MessageEditedFromServerResponse = {
+  id: null;
+  type: RequestResponseTypes.MSG_EDITED_FROM_SERVER;
+  payload: {
+    message: { id: string; text: string; datetime: number };
+  };
+};
+
 export type ServerResponse =
   | AuthErrorResponse
   | AuthResponse
@@ -239,4 +263,6 @@ export type ServerResponse =
   | UserExternalLoginResponse
   | MessageDeleteResponse
   | MessageDeleteResponse
-  | MessageDeletedFromServerResponse;
+  | MessageDeletedFromServerResponse
+  | MessageEditResponse
+  | MessageEditedFromServerResponse;

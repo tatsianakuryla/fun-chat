@@ -369,7 +369,8 @@
   margin-left: 0.5rem;
 }
 
-.chat__msg-delete-btn {
+.chat__msg-delete-btn,
+.chat__msg-edit-btn {
   cursor: pointer;
   border: none;
   background: transparent;
