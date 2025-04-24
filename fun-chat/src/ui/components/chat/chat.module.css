@@ -376,6 +376,17 @@
   background: transparent;
 }
 
+.chat__edited-badge {
+  margin-left: 4px;
+  font-size: 0.8em;
+  color: #777;
+}
+
+.chat__edit-input {
+  box-sizing: border-box;
+  width: 100%;
+}
+
 @media (width <= 768px) {
   .chat__heading {
     font-size: 1.5rem;

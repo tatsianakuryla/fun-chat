@@ -58,11 +58,7 @@ export class WebSocketService {
   private static _editResponseMap = new Map<
     string,
     {
-      resolve: (message: {
-        id: string;
-        text: string;
-        datetime: number;
-      }) => void;
+      resolve: (message: Message) => void;
       reject: () => void;
     }
   >();
@@ -349,15 +345,12 @@ export class WebSocketService {
     }
   }
 
-  public static editMessage(
-    id: string,
-    newText: string,
-  ): Promise<{ id: string; text: string; datetime: number }> {
+  public static editMessage(id: string, text: string): Promise<Message> {
     const reqId = IdCreator.getNew();
     const request: MessageEditRequest = {
       id: reqId,
       type: RequestResponseTypes.MSG_EDIT,
-      payload: { message: { id, newText } },
+      payload: { message: { id, text } },
     };
     return new Promise((resolve, reject) => {
       this._editResponseMap.set(reqId, { resolve, reject });
@@ -367,10 +360,10 @@ export class WebSocketService {
 
   private static _handleEdit(result: ServerResponse): void {
     if (result.type === RequestResponseTypes.MSG_EDIT) {
-      const handler = this._editResponseMap.get(result.id!);
-      if (!handler) return;
+      const handle = this._editResponseMap.get(result.id!);
+      if (!handle) return;
       this._editResponseMap.delete(result.id!);
-      handler.resolve(result.payload.message);
+      handle.resolve(result.payload.message);
     }
   }
 }

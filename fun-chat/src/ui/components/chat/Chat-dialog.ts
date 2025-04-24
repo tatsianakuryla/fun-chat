@@ -83,8 +83,8 @@ export class Dialog {
       }
 
       if (message.type === RequestResponseTypes.MSG_EDITED_FROM_SERVER) {
-        const { id, text, datetime } = message.payload.message;
-        this._applyEdit(id, text, datetime);
+        const m = message.payload.message;
+        this._applyEdit(m.id, m.text, m.datetime);
       }
     });
   }
@@ -239,9 +239,19 @@ export class Dialog {
     ]);
     wrapper.setAttribute('data-msg-id', message.id);
 
-    const textDiv = createElementWithClassId('div');
+    const textDiv = createElementWithClassId('div', [
+      style['chat__dialog-text'],
+    ]);
     textDiv.textContent = message.text;
     wrapper.append(textDiv);
+
+    if (message.status.isEdited) {
+      const mark = document.createElement('span');
+      mark.className = 'edited-mark';
+      mark.textContent = 'edited';
+      mark.setAttribute('aria-hidden', 'true');
+      textDiv.after(mark);
+    }
 
     if (isMine) {
       const editBtn = ButtonFactory.create(
@@ -249,22 +259,24 @@ export class Dialog {
         'button',
         '✏️',
       );
+      editBtn.classList.add('edit-btn');
       editBtn.addEventListener('click', () =>
         this._startEdit(message.id, textDiv),
       );
       wrapper.append(editBtn);
 
-      const delButton = ButtonFactory.create(
+      const delBtn = ButtonFactory.create(
         [style['chat__msg-delete-btn']],
         'button',
         '🗑',
       );
-      delButton.addEventListener('click', () => {
-        wrapper?.remove();
+      delBtn.addEventListener('click', () => {
+        wrapper.remove();
         WebSocketService.deleteMessage(message.id);
       });
-      wrapper.append(delButton);
+      wrapper.append(delBtn);
     }
+
     this._body.append(wrapper);
     this._scrollToBottom();
   }
@@ -277,34 +289,51 @@ export class Dialog {
     textDiv.replaceWith(input);
     input.focus();
 
+    const cleanup = () => {
+      input.removeEventListener('blur', save);
+      input.removeEventListener('keydown', onKeyDown);
+    };
+
     const save = () => {
+      cleanup();
       const newText = input.value.trim();
-      if (!newText || newText === oldText) {
+      if (!newText) {
         input.replaceWith(textDiv);
         return;
       }
       WebSocketService.editMessage(msgId, newText)
         .then((editedMsg) => {
+          input.replaceWith(textDiv);
           this._applyEdit(msgId, editedMsg.text, editedMsg.datetime);
         })
         .catch(console.error);
     };
 
-    input.addEventListener('blur', save);
-    input.addEventListener('keydown', (event) => {
-      if (event.key === 'Enter') {
-        event.preventDefault();
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
         save();
       }
-    });
+    };
+
+    input.addEventListener('blur', save);
+    input.addEventListener('keydown', onKeyDown);
   }
 
   private _applyEdit(msgId: string, newText: string, datetime: number) {
-    const wrapper = this._body.querySelector(`[data-msg-id="${msgId}"]`);
+    const wrapper = this._body.querySelector(`[data-msg-id=\"${msgId}\"]`);
     if (!wrapper) return;
-    const textDiv = wrapper.querySelector('div')!;
+    const textDiv = wrapper.querySelector(`.${style['chat__dialog-text']}`)!;
     textDiv.textContent = newText;
-    wrapper.classList.add(style['chat__message_edited']);
+
+    const editBtn = wrapper.querySelector('button.edit-btn');
+    if (editBtn && !wrapper.querySelector('.edited-mark')) {
+      const mark = document.createElement('span');
+      mark.className = 'edited-mark';
+      mark.textContent = 'edited';
+      mark.setAttribute('aria-hidden', 'true');
+      editBtn.after(mark);
+    }
   }
 
   private _scrollToBottom(): void {

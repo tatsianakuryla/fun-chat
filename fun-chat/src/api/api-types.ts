@@ -228,7 +228,10 @@ export type MessageEditRequest = {
   id: string;
   type: RequestResponseTypes.MSG_EDIT;
   payload: {
-    message: { id: string; newText: string };
+    message: {
+      id: string;
+      text: string;
+    };
   };
 };
 
@@ -236,7 +239,7 @@ export type MessageEditResponse = {
   id: string;
   type: RequestResponseTypes.MSG_EDIT;
   payload: {
-    message: { id: string; text: string; datetime: number };
+    message: Message;
   };
 };
 
