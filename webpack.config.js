@@ -5,8 +5,9 @@ module.exports = {
   entry: './fun-chat/src/index.ts',
   output: {
     filename: 'bundle.js',
-    path: path.resolve(__dirname, 'fun-chat/dist'),
+    path: path.resolve(__dirname, 'dist'),
     clean: true,
+    publicPath: '/fun-chat/',
   },
   mode: 'development',
   devtool: 'source-map',

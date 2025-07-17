@@ -10,9 +10,9 @@
     "prepare": "husky install",
     "test": "echo \"No tests specified\" && exit 0",
     "predeploy": "npm run build",
-    "deploy": "gh-pages -d fun-chat/dist"
+    "deploy": "gh-pages -d dist -r https://github.com/tatsianakuryla/fun-chat.git"
   },
-  "homepage": "https://tatsianakuryla.github.io/tatsianakuryla-JSFE2024Q4/fun-chat",
+  "homepage": "https://tatsianakuryla.github.io/fun-chat",
   "devDependencies": {
     "@commitlint/cli": "^19.8.0",
     "@commitlint/config-conventional": "^19.8.0",
