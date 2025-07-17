@@ -10,19 +10,18 @@ export enum RequestResponseTypes {
   USER_INACTIVE = 'USER_INACTIVE',
   MSG_FROM_USER = 'MSG_FROM_USER',
   MSG_SEND = 'MSG_SEND',
-  MSG_READED = 'MSG_READ',
+  MSG_READ = 'MSG_READ',
   MSG_DELETE = 'MSG_DELETE',
   MSG_EDIT = 'MSG_EDIT',
 
   USER_EXTERNAL_LOGIN = 'USER_EXTERNAL_LOGIN',
   USER_EXTERNAL_LOGOUT = 'USER_EXTERNAL_LOGOUT',
-  MSG_DELIVERED = 'MSG_DELIVER',
   Error = 'ERROR',
 }
 
-export type LoginedUser = {
+export type LoginUser = {
   login: string;
-  isLogined: boolean;
+  isLogin: boolean;
 };
 
 export type AuthRequest = {
@@ -37,7 +36,7 @@ export type AuthResponse = {
   id: string;
   type: RequestResponseTypes.Login;
   payload: {
-    user: LoginedUser;
+    user: LoginUser;
   };
 };
 
@@ -67,7 +66,7 @@ export type LogoutResponse = {
   id: string;
   type: RequestResponseTypes.Logout;
   payload: {
-    user: LoginedUser;
+    user: LoginUser;
   };
 };
 
@@ -81,7 +80,7 @@ export type GetActiveUsersResponse = {
   id: string;
   type: RequestResponseTypes.USER_ACTIVE;
   payload: {
-    users: LoginedUser[];
+    users: LoginUser[];
   };
 };
 
@@ -95,7 +94,7 @@ export type GetInactiveUsersResponse = {
   id: string;
   type: RequestResponseTypes.USER_INACTIVE;
   payload: {
-    users: LoginedUser[];
+    users: LoginUser[];
   };
 };
 
@@ -107,7 +106,7 @@ export type Message = {
   datetime: number;
   status: {
     isDelivered: boolean;
-    isReaded: boolean;
+    isRead: boolean;
     isEdited: boolean;
   };
 };
@@ -157,23 +156,23 @@ export type MessageSendBroadcast = {
 
 export type MessageReadRequest = {
   id: string;
-  type: RequestResponseTypes.MSG_READED;
+  type: RequestResponseTypes.MSG_READ;
   payload: { message: { id: string } };
 };
 
 export type MessageReadResponse = {
   id: string;
-  type: RequestResponseTypes.MSG_READED;
+  type: RequestResponseTypes.MSG_READ;
   payload: {
-    message: { id: string; status: { isReaded: boolean } };
+    message: { id: string; status: { isRead: boolean } };
   };
 };
 
 export type MessageReadBroadcast = {
   id: null;
-  type: RequestResponseTypes.MSG_READED;
+  type: RequestResponseTypes.MSG_READ;
   payload: {
-    message: { id: string; status: { isReaded: boolean } };
+    message: { id: string; status: { isRead: boolean } };
   };
 };
 
@@ -181,7 +180,7 @@ export type UserExternalLoginResponse = {
   id: null;
   type: RequestResponseTypes.USER_EXTERNAL_LOGIN;
   payload: {
-    user: LoginedUser;
+    user: LoginUser;
   };
 };
 
@@ -189,14 +188,8 @@ export type UserExternalLogoutResponse = {
   id: null;
   type: RequestResponseTypes.USER_EXTERNAL_LOGOUT;
   payload: {
-    user: LoginedUser;
+    user: LoginUser;
   };
-};
-
-export type MessageDeleteRequest = {
-  id: string;
-  type: RequestResponseTypes.MSG_DELETE;
-  payload: { message: { id: string } };
 };
 
 export type MessageDeleteResponse = {
@@ -246,20 +239,30 @@ export type MessageEditBroadcast = {
   };
 };
 
-export type ServerResponse =
+type AuthResponses =
   | AuthErrorResponse
   | AuthResponse
   | LogoutResponse
-  | GetActiveUsersResponse
-  | GetInactiveUsersResponse
+  | UserExternalLoginResponse
+  | UserExternalLogoutResponse;
+
+type UserResponses = GetActiveUsersResponse | GetInactiveUsersResponse;
+
+type MessageUserResponses =
   | MessageFromUserResponse
   | MessageSendResponse
   | MessageReadResponse
-  | UserExternalLogoutResponse
-  | UserExternalLoginResponse
-  | MessageDeleteResponse
   | MessageEditResponse
-  | MessageEditBroadcast
-  | MessageDeleteBroadcast
+  | MessageDeleteResponse;
+
+type MessageBroadcastResponses =
   | MessageSendBroadcast
-  | MessageReadBroadcast;
+  | MessageReadBroadcast
+  | MessageEditBroadcast
+  | MessageDeleteBroadcast;
+
+export type ServerResponse =
+  | AuthResponses
+  | UserResponses
+  | MessageUserResponses
+  | MessageBroadcastResponses;

@@ -1,8 +1,4 @@
-import {
-  errorNotificationClass,
-  SERVER_ERROR_TEXTCONTENT,
-  SERVER_SUCCESS_INFO,
-} from '..';
+import { errorNotificationClass, SERVER_ERROR_TEXT_CONTENT } from '..';
 import { AuthState } from '../core/auth/Auth-state';
 import { IdCreator } from '../core/id-creator/id-creator';
 import {
@@ -16,7 +12,7 @@ import {
   type ServerResponse,
   type AuthErrorsMessages,
   type AuthRequest,
-  type LoginedUser,
+  type LoginUser,
   type LogoutRequest,
   type MessageEditRequest,
 } from './api-types';
@@ -27,14 +23,14 @@ export class WebSocketService {
   private static _loginResponseMap = new Map<
     string,
     {
-      resolve: (user: LoginedUser) => void;
+      resolve: (user: LoginUser) => void;
       reject: (error: AuthErrorsMessages) => void;
     }
   >();
   private static _usersResponseMap = new Map<
     string,
     {
-      resolve: (users: LoginedUser[]) => void;
+      resolve: (users: LoginUser[]) => void;
       reject: (error: AuthErrorsMessages) => void;
     }
   >();
@@ -52,7 +48,7 @@ export class WebSocketService {
   private static _readResponseMap = new Map<
     string,
     {
-      resolve: (message: { id: string; status: { isReaded: boolean } }) => void;
+      resolve: (message: { id: string; status: { isRead: boolean } }) => void;
       reject: () => void;
     }
   >();
@@ -76,12 +72,8 @@ export class WebSocketService {
   private static _reconnectDelay = 1000;
   private static _maxReconnectDelay = 30000;
 
-  public static get isConnected(): boolean {
-    return this._socket?.readyState === WebSocket.OPEN;
-  }
-
   public static connect(): void {
-    this._socket = new WebSocket('ws://localhost:4000');
+    this._socket = new WebSocket('https://fun-chat-server-3m8s.onrender.com');
 
     this._socket.addEventListener('open', () => {
       this._messageQueue.forEach((data) => this._socket.send(data));
@@ -95,7 +87,7 @@ export class WebSocketService {
       const password = AuthState.password;
       if (user && password) {
         this.loginUser(user.login, password)
-          .then((loginedUser) => AuthState.setUser(loginedUser, password))
+          .then((loginUser) => AuthState.setUser(loginUser, password))
           .catch(() => AuthState.clear());
       }
     });
@@ -103,12 +95,12 @@ export class WebSocketService {
     this._socket.addEventListener('message', this._handleMessage);
 
     this._socket.addEventListener('error', () => {
-      errorNotificationClass.open(SERVER_ERROR_TEXTCONTENT);
+      errorNotificationClass.open(SERVER_ERROR_TEXT_CONTENT);
       this._socket.close();
     });
 
     this._socket.addEventListener('close', () => {
-      errorNotificationClass.open(SERVER_ERROR_TEXTCONTENT);
+      errorNotificationClass.open(SERVER_ERROR_TEXT_CONTENT);
       this._onDisconnect.forEach((function_) => function_());
 
       if (this._shouldReconnect) {
@@ -133,10 +125,7 @@ export class WebSocketService {
     this._onReconnect.push(function_);
   }
 
-  public static loginUser(
-    login: string,
-    password: string,
-  ): Promise<LoginedUser> {
+  public static loginUser(login: string, password: string): Promise<LoginUser> {
     const id = IdCreator.getNew();
     const request: AuthRequest = {
       id,
@@ -153,7 +142,7 @@ export class WebSocketService {
   public static logoutUser(
     login: string,
     password: string,
-  ): Promise<LoginedUser> {
+  ): Promise<LoginUser> {
     const id = IdCreator.getNew();
     const request: LogoutRequest = {
       id,
@@ -167,7 +156,7 @@ export class WebSocketService {
     });
   }
 
-  public static getActiveUsers(): Promise<LoginedUser[]> {
+  public static getActiveUsers(): Promise<LoginUser[]> {
     const id = IdCreator.getNew();
     const request: GetActiveUsersRequest = {
       id,
@@ -181,7 +170,7 @@ export class WebSocketService {
     });
   }
 
-  public static getInactiveUsers(): Promise<LoginedUser[]> {
+  public static getInactiveUsers(): Promise<LoginUser[]> {
     const id = IdCreator.getNew();
     const request: GetInactiveUsersRequest = {
       id,
@@ -237,11 +226,11 @@ export class WebSocketService {
 
   public static readMessage(
     messageId: string,
-  ): Promise<{ id: string; status: { isReaded: boolean } }> {
+  ): Promise<{ id: string; status: { isRead: boolean } }> {
     const id = IdCreator.getNew();
     const request: MessageReadRequest = {
       id,
-      type: RequestResponseTypes.MSG_READED,
+      type: RequestResponseTypes.MSG_READ,
       payload: { message: { id: messageId } },
     };
     return new Promise((resolve, reject) => {
@@ -275,7 +264,6 @@ export class WebSocketService {
 
   private static _handleMessage = (event: MessageEvent): void => {
     const result: ServerResponse = JSON.parse(event.data);
-    console.log('WS onMessage:', result);
     this._handleAuth(result);
     this._handleUsersList(result);
     this._handleHistory(result);
@@ -347,7 +335,7 @@ export class WebSocketService {
   }
 
   private static _handleRead(result: ServerResponse): void {
-    if (result.type === RequestResponseTypes.MSG_READED) {
+    if (result.type === RequestResponseTypes.MSG_READ) {
       const handler = this._readResponseMap.get(result.id!);
       if (!handler) return;
       this._readResponseMap.delete(result.id!);

@@ -1,12 +1,12 @@
-import { type LoginedUser } from '../../api/api-types';
+import { type LoginUser } from '../../api/api-types';
 import { LocalStorage } from '../local-storge/Local-storage';
 import { LocalStorageKeys } from '../local-storge/local-storage-types';
 
 export class AuthState {
-  private static _user: LoginedUser | null = null;
+  private static _user: LoginUser | null = null;
   private static _password: string | null;
 
-  public static get user(): LoginedUser | null {
+  public static get user(): LoginUser | null {
     return this._user;
   }
 
@@ -23,7 +23,7 @@ export class AuthState {
     this._password = LocalStorage.getUserData(LocalStorageKeys.Password);
   }
 
-  public static setUser(user: LoginedUser, password: string): void {
+  public static setUser(user: LoginUser, password: string): void {
     this._user = user;
     this._password = password;
     LocalStorage.setUser(LocalStorageKeys.User, user);

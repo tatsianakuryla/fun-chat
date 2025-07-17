@@ -1,6 +1,6 @@
 import { FLEX_CLASS } from '../../..';
 import {
-  type LoginedUser,
+  type LoginUser,
   type Message,
   RequestResponseTypes,
 } from '../../../api/api-types';
@@ -13,14 +13,14 @@ import style from './chat.module.css';
 export class Dialog {
   private readonly _DIALOG_BEGIN_TEXTCONTENT =
     'It is the begining of the dialog';
-  private readonly _HISTORY_ERROR = 'An error of loading occured';
+  private readonly _HISTORY_ERROR = 'An error of loading occurred';
   private readonly _DIALOG_PLACEHOLDER = 'Type a message…';
-  private _element: HTMLElement;
-  private _header: HTMLElement;
-  private _body: HTMLElement;
-  private _footer: HTMLElement;
-  private _currentUser!: LoginedUser;
-  private _statusDiv: HTMLElement;
+  private readonly _element: HTMLElement;
+  private readonly _header: HTMLElement;
+  private readonly _body: HTMLElement;
+  private readonly _footer: HTMLElement;
+  private _currentUser!: LoginUser;
+  private readonly _statusDiv: HTMLElement;
 
   constructor() {
     this._element = createElementWithClassId('div', [
@@ -86,7 +86,7 @@ export class Dialog {
         this._applyEdit(m.id, m.text);
       }
 
-      if (message.type === RequestResponseTypes.MSG_READED) {
+      if (message.type === RequestResponseTypes.MSG_READ) {
         const readId = message.payload.message.id;
         const wrapper = this._body.querySelector(`[data-msg-id="${readId}"]`);
         if (wrapper) {
@@ -101,11 +101,11 @@ export class Dialog {
     return this._element;
   }
 
-  public get currentUser(): LoginedUser {
+  public get currentUser(): LoginUser {
     return this._currentUser;
   }
 
-  public openWith(user: LoginedUser): void {
+  public openWith(user: LoginUser): void {
     this._currentUser = user;
     this._renderHeader(user);
     this._body.replaceChildren();
@@ -118,8 +118,7 @@ export class Dialog {
 
         messages
           .filter(
-            (message) =>
-              message.from === user.login && !message.status.isReaded,
+            (message) => message.from === user.login && !message.status.isRead,
           )
           .forEach((message) =>
             WebSocketService.readMessage(message.id).catch(() => {}),
@@ -146,19 +145,19 @@ export class Dialog {
     this._body.append(placeholder);
   }
 
-  private _renderHeader(user: LoginedUser): void {
+  private _renderHeader(user: LoginUser): void {
     this._header.replaceChildren();
     const nameDiv = createElementWithClassId('div', [
       style['chat__dialog-username'],
     ]);
     nameDiv.textContent = user.login;
     this._statusDiv.classList.add(
-      user.isLogined
+      user.isLogin
         ? style['chat__dialog-status_online']
         : style['chat__dialog-status_offline'],
     );
-    this._statusDiv.textContent = user.isLogined ? 'online' : 'offline';
-    this._statusDiv.textContent = user.isLogined ? 'online' : 'offline';
+    this._statusDiv.textContent = user.isLogin ? 'online' : 'offline';
+    this._statusDiv.textContent = user.isLogin ? 'online' : 'offline';
     this._header.append(nameDiv, this._statusDiv);
   }
 
@@ -260,9 +259,9 @@ export class Dialog {
 
     if (isMine) {
       const statusSpan = createElementWithClassId('span', ['msg-status']);
-      statusSpan.textContent = message.status.isReaded
+      statusSpan.textContent = message.status.isRead
         ? 'read'
-        : this._currentUser.isLogined
+        : this._currentUser.isLogin
           ? 'delivered'
           : 'sent';
       metaDiv.append(statusSpan);
@@ -299,7 +298,7 @@ export class Dialog {
       );
       delButton.addEventListener('click', () => {
         wrapper.remove();
-        WebSocketService.deleteMessage(message.id);
+        void WebSocketService.deleteMessage(message.id);
       });
       actions.append(delButton);
 
