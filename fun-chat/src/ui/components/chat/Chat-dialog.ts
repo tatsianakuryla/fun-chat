@@ -13,14 +13,13 @@ import style from './chat.module.css';
 export class Dialog {
   private readonly _DIALOG_BEGIN_TEXTCONTENT =
     'It is the begining of the dialog';
-  private readonly _HISTORY_ERROR = 'An error of loading occured';
   private readonly _DIALOG_PLACEHOLDER = 'Type a message…';
-  private _element: HTMLElement;
-  private _header: HTMLElement;
-  private _body: HTMLElement;
-  private _footer: HTMLElement;
+  private readonly _element: HTMLElement;
+  private readonly _header: HTMLElement;
+  private readonly _body: HTMLElement;
+  private readonly _footer: HTMLElement;
   private _currentUser!: LoginedUser;
-  private _statusDiv: HTMLElement;
+  private readonly _statusDiv: HTMLElement;
 
   constructor() {
     this._element = createElementWithClassId('div', [
@@ -56,8 +55,7 @@ export class Dialog {
       }
 
       if (message.type === RequestResponseTypes.USER_EXTERNAL_LOGIN) {
-        const loginMessage = message;
-        const other = loginMessage.payload.user;
+        const other = message.payload.user;
         if (other && other?.login === this._currentUser?.login) {
           this._updateStatus(true);
         }
@@ -65,8 +63,7 @@ export class Dialog {
       }
 
       if (message.type === RequestResponseTypes.USER_EXTERNAL_LOGOUT) {
-        const logoutMessage = message;
-        const other = logoutMessage.payload.user;
+        const other = message.payload.user;
         if (other && other?.login === this._currentUser?.login) {
           this._updateStatus(false);
         }
@@ -299,7 +296,7 @@ export class Dialog {
       );
       delButton.addEventListener('click', () => {
         wrapper.remove();
-        WebSocketService.deleteMessage(message.id);
+        void WebSocketService.deleteMessage(message.id);
       });
       actions.append(delButton);
 

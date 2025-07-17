@@ -5,8 +5,8 @@ export class ErrorNotification {
   private static readonly CLOSE_TIMEOUT_MS = 5000;
   private static readonly EMPTY_TEXT = '';
 
-  private _errorNotification: HTMLElement;
-  private _errorTextElement: HTMLElement;
+  private readonly _errorNotification: HTMLElement;
+  private readonly _errorTextElement: HTMLElement;
 
   constructor() {
     this._errorNotification = createElementWithClassId('div', [

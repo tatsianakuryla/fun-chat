@@ -1,8 +1,4 @@
-import {
-  errorNotificationClass,
-  SERVER_ERROR_TEXTCONTENT,
-  SERVER_SUCCESS_INFO,
-} from '..';
+import { errorNotificationClass, SERVER_ERROR_TEXTCONTENT } from '..';
 import { AuthState } from '../core/auth/Auth-state';
 import { IdCreator } from '../core/id-creator/id-creator';
 import {
@@ -76,12 +72,8 @@ export class WebSocketService {
   private static _reconnectDelay = 1000;
   private static _maxReconnectDelay = 30000;
 
-  public static get isConnected(): boolean {
-    return this._socket?.readyState === WebSocket.OPEN;
-  }
-
   public static connect(): void {
-    this._socket = new WebSocket('ws://localhost:4000');
+    this._socket = new WebSocket('https://fun-chat-server-3m8s.onrender.com');
 
     this._socket.addEventListener('open', () => {
       this._messageQueue.forEach((data) => this._socket.send(data));
@@ -275,7 +267,6 @@ export class WebSocketService {
 
   private static _handleMessage = (event: MessageEvent): void => {
     const result: ServerResponse = JSON.parse(event.data);
-    console.log('WS onMessage:', result);
     this._handleAuth(result);
     this._handleUsersList(result);
     this._handleHistory(result);

@@ -16,7 +16,6 @@ export enum RequestResponseTypes {
 
   USER_EXTERNAL_LOGIN = 'USER_EXTERNAL_LOGIN',
   USER_EXTERNAL_LOGOUT = 'USER_EXTERNAL_LOGOUT',
-  MSG_DELIVERED = 'MSG_DELIVER',
   Error = 'ERROR',
 }
 
@@ -191,12 +190,6 @@ export type UserExternalLogoutResponse = {
   payload: {
     user: LoginedUser;
   };
-};
-
-export type MessageDeleteRequest = {
-  id: string;
-  type: RequestResponseTypes.MSG_DELETE;
-  payload: { message: { id: string } };
 };
 
 export type MessageDeleteResponse = {

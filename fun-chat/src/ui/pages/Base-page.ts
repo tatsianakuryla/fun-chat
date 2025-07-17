@@ -10,14 +10,6 @@ export abstract class BasePage<T extends Chat | AuthForm | About> {
     this._element = null;
   }
 
-  public get element(): T | null {
-    return this._element;
-  }
-
-  public set element(value: T | null) {
-    this._element = value;
-  }
-
   public clear(): void {
     if (!this._element) return;
 

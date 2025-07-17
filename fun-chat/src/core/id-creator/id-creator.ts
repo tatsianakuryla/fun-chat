@@ -5,8 +5,4 @@ export class IdCreator {
     this._idCounter += 1;
     return String(this._idCounter);
   }
-
-  public static resetCounter(): void {
-    this._idCounter = 0;
-  }
 }

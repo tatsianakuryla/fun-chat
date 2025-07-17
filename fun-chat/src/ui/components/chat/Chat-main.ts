@@ -19,7 +19,7 @@ export class ChatMain {
   private _searchTimeoutId!: ReturnType<typeof setTimeout>;
   private readonly _SEARCH_TIMEOUT = 300;
   private _searchTerm = '';
-  private _usersList: HTMLUListElement;
+  private readonly _usersList: HTMLUListElement;
   private _dialog: Dialog;
 
   constructor() {
@@ -30,20 +30,6 @@ export class ChatMain {
     this.renderUsersList();
     this._dialog = new Dialog();
     this._dialog.showPlaceholder('Choose a recipient');
-    // WebSocketService.onMessage((message) => {
-    //   if (message.type !== RequestResponseTypes.MSG_SEND) return;
-    //   const m = message.payload.message;
-    //   if (m.from === AuthState.user?.login) return;
-
-    //   if (this._dialog.currentUser?.login === m.from) {
-    //     WebSocketService.readMessage(m.id).catch(() => {});
-    //   } else {
-    //     const previous = ChatMain._unreadMap.get(m.from) || 0;
-    //     ChatMain._unreadMap.set(m.from, previous + 1);
-    //     this.renderUsersList();
-    //   }
-    // });
-
     WebSocketService.onMessage((message: ServerResponse) => {
       switch (message.type) {
         case RequestResponseTypes.MSG_SEND:
@@ -113,8 +99,6 @@ export class ChatMain {
 
   public renderUsersList(): void {
     ChatMain._getAllUsers().then((users) => {
-      console.log('Все юзеры от сервера:', users);
-      console.log('Текущий логин из AuthState:', AuthState.user?.login);
       this._usersList.replaceChildren();
       const withoutCurrentUser = users
         .filter((user) => user.login !== AuthState.user?.login)
@@ -123,8 +107,6 @@ export class ChatMain {
             .toLowerCase()
             .includes(this._searchTerm.trim().toLowerCase()),
         );
-
-      console.log('После фильтрации:', withoutCurrentUser);
       const userItemsPromises = withoutCurrentUser.map(async (user) => {
         const login = user.login;
         const status = user.isLogined ? UserStatus.Online : UserStatus.Offline;

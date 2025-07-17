@@ -37,10 +37,6 @@ export class Chat {
     return this._footerContainer;
   }
 
-  public get chatMain(): ChatMain {
-    return this._chatMain;
-  }
-
   private static _updateErrorMessage(
     element: HTMLElement,
     messages: string[],
