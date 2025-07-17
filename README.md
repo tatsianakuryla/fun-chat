@@ -15,9 +15,6 @@
 - [🧩 Project Structure](#-project-structure)
 - [🔧 Scripts & Setup](#-scripts--setup)
 - [⚙️ Technologies Used](#-technologies-used)
-- [🔐 Authentication & Routing](#-authentication--routing)
-- [📂 Deployment](#-deployment)
-- [📝 License](#-license)
 
 ---
 
