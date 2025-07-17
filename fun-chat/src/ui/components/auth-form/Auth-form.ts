@@ -22,7 +22,7 @@ export class AuthForm {
   private static readonly _SUBMIT_BUTTON_TEXT = 'Log In';
   private static readonly _TIMEOUT = 500;
 
-  private readonly _form: HTMLFormElement;
+  private _form: HTMLFormElement;
   private _mainContainer = ContainerFactory.create('auth-form');
   private _loginInput = AuthForm._createInput(
     AuthFormFields.Login,
@@ -165,11 +165,13 @@ export class AuthForm {
       FLEX_CLASS,
     ]);
     inputWrapper.append(this._passwordInput, this._showPasswordButton);
-    return AuthForm._createWrapper(
+    const passwordWrapper = AuthForm._createWrapper(
       AuthFormFields.Password,
       inputWrapper,
       this._passwordErrorMessage,
     );
+
+    return passwordWrapper;
   }
 
   private _validateField(

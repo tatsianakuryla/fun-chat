@@ -2,9 +2,9 @@ import { errorNotificationClass, FLEX_CLASS } from '../..';
 import { createElementWithClassId } from '../../utils/helpers';
 
 export class PrimaryLayout {
-  private readonly _main: HTMLElement;
-  private readonly _header: HTMLElement;
-  private readonly _footer: HTMLElement;
+  private _main: HTMLElement;
+  private _header: HTMLElement;
+  private _footer: HTMLElement;
 
   constructor() {
     this._header = createElementWithClassId('header', [FLEX_CLASS]);

@@ -1,6 +1,6 @@
 import { FLEX_CLASS } from '../../..';
 import {
-  type LoginUser,
+  type LoginedUser,
   type Message,
   RequestResponseTypes,
   type ServerResponse,
@@ -19,7 +19,7 @@ export class ChatMain {
   private _searchTimeoutId!: ReturnType<typeof setTimeout>;
   private readonly _SEARCH_TIMEOUT = 300;
   private _searchTerm = '';
-  private readonly _usersList: HTMLUListElement;
+  private _usersList: HTMLUListElement;
   private _dialog: Dialog;
 
   constructor() {
@@ -30,6 +30,19 @@ export class ChatMain {
     this.renderUsersList();
     this._dialog = new Dialog();
     this._dialog.showPlaceholder('Choose a recipient');
+    // WebSocketService.onMessage((message) => {
+    //   if (message.type !== RequestResponseTypes.MSG_SEND) return;
+    //   const m = message.payload.message;
+    //   if (m.from === AuthState.user?.login) return;
+
+    //   if (this._dialog.currentUser?.login === m.from) {
+    //     WebSocketService.readMessage(m.id).catch(() => {});
+    //   } else {
+    //     const previous = ChatMain._unreadMap.get(m.from) || 0;
+    //     ChatMain._unreadMap.set(m.from, previous + 1);
+    //     this.renderUsersList();
+    //   }
+    // });
 
     WebSocketService.onMessage((message: ServerResponse) => {
       switch (message.type) {
@@ -83,7 +96,7 @@ export class ChatMain {
     return item;
   }
 
-  private static async _getAllUsers(): Promise<LoginUser[]> {
+  private static async _getAllUsers(): Promise<LoginedUser[]> {
     const [onlineUsers, offlineUsers] = await Promise.all([
       WebSocketService.getActiveUsers(),
       WebSocketService.getInactiveUsers(),
@@ -100,6 +113,8 @@ export class ChatMain {
 
   public renderUsersList(): void {
     ChatMain._getAllUsers().then((users) => {
+      console.log('Все юзеры от сервера:', users);
+      console.log('Текущий логин из AuthState:', AuthState.user?.login);
       this._usersList.replaceChildren();
       const withoutCurrentUser = users
         .filter((user) => user.login !== AuthState.user?.login)
@@ -108,9 +123,11 @@ export class ChatMain {
             .toLowerCase()
             .includes(this._searchTerm.trim().toLowerCase()),
         );
+
+      console.log('После фильтрации:', withoutCurrentUser);
       const userItemsPromises = withoutCurrentUser.map(async (user) => {
         const login = user.login;
-        const status = user.isLogin ? UserStatus.Online : UserStatus.Offline;
+        const status = user.isLogined ? UserStatus.Online : UserStatus.Offline;
 
         const newMessages = ChatMain._unreadMap.get(login) || 0;
         const item = ChatMain._createUserListItem(status, login, newMessages);
@@ -157,7 +174,7 @@ export class ChatMain {
     return searchInput;
   }
 
-  private _onUserSelected(user: LoginUser): void {
+  private _onUserSelected(user: LoginedUser): void {
     ChatMain._unreadMap.set(user.login, 0);
     this.renderUsersList();
     this._dialog.openWith(user);

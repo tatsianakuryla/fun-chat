@@ -8,8 +8,8 @@ export class AboutLinkFactory {
     const link = createElementWithClassId('a', [style['about-link']]);
     link.href = `#${Routes.About}`;
     link.textContent = 'About';
-    link.addEventListener('click', (event) => {
-      event.preventDefault();
+    link.addEventListener('click', (e) => {
+      e.preventDefault();
       Router.navigateTo(Routes.About);
     });
     return link;

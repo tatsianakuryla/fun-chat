@@ -12,7 +12,7 @@ import { AboutPage } from './ui/pages/About-page';
 import { ErrorNotification } from './ui/components/error-notification/Error-notification';
 
 export const FLEX_CLASS = 'flex';
-export const SERVER_ERROR_TEXT_CONTENT =
+export const SERVER_ERROR_TEXTCONTENT =
   'Connection lost. Attempting to reconnect...';
 export const SERVER_SUCCESS_INFO = 'Connection established successfully.';
 export const primaryLayout = new PrimaryLayout();
@@ -25,7 +25,7 @@ function appInit(): void {
   AuthState.init();
 
   WebSocketService.onDisconnect(() => {
-    errorNotificationClass.open(SERVER_ERROR_TEXT_CONTENT);
+    errorNotificationClass.open(SERVER_ERROR_TEXTCONTENT);
   });
 
   WebSocketService.connect();

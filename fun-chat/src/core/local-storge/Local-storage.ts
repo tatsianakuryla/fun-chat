@@ -1,4 +1,4 @@
-import { type LoginUser } from '../../api/api-types';
+import { type LoginedUser } from '../../api/api-types';
 import { type LocalStorageKeys } from './local-storage-types';
 
 export class LocalStorage {
@@ -16,11 +16,11 @@ export class LocalStorage {
     return result ? result : null;
   }
 
-  public static setUser(key: LocalStorageKeys, user: LoginUser): void {
+  public static setUser(key: LocalStorageKeys, user: LoginedUser): void {
     localStorage.setItem(key, JSON.stringify(user));
   }
 
-  public static getUser(key: LocalStorageKeys.User): LoginUser | null {
+  public static getUser(key: LocalStorageKeys.User): LoginedUser | null {
     const result = localStorage.getItem(key);
     return result ? JSON.parse(result) : null;
   }
